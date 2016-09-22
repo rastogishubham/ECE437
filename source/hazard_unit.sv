@@ -2,11 +2,18 @@
 `include "hazard_unit_if.vh"
 import cpu_types_pkg::*;
 module hazard_unit (
+	input logic CLK, nRST
 	hazard_unit_if.hz hzif
 );
-
-if(hzif.Rs_ID == hzif.Wsel_ex || hzif.Rt_ID == hzif.Wsel_ex)
+always_comb
 begin
-	hzif.PCEN = 0;
-	hzif.
+	if(hzif.Rs_EX == hzif.Wsel_mem | hzif.Rt_EX == hzif.Wsel_mem)
+	begin
+		hzif.read_val = hzif.wdat_MEM;
+	end
+	else if (hzif.Rs_EX == hzif.Wsel_wb | hzif.Rt_EX == hzif.Wsel_wb)
+	begin
+		hzif.read_val = hzif.wdat_WB;
+	end
 end
+endmodule 
