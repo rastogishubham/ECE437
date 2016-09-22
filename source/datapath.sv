@@ -9,9 +9,12 @@
 // data path interface
 `include "datapath_cache_if.vh"
 `include "control_unit_if.vh"
-`include "request_unit_if.vh"
 `include "program_counter_if.vh"
 `include "alu_if.vh"
+`include "IF_ID_if.vh"
+`include "ID_EX_if.vh"
+`include "EX_MEM_if.vh"
+`include "MEM_WB_if.vh"
 
 // alu op, mips op, and instruction type
 `include "cpu_types_pkg.vh"
@@ -27,23 +30,29 @@ module datapath (
   parameter PC_INIT = 0;
 
   //Variables
-  word_t Imm_ext, PC_4, Branch, Branch_in, JumpVal, Branch_final;
-  logic z_final;
+  word_t extImm, PC_4, Branch, Branch_in, JumpVal, Branch_final, LUI_val;
+  logic z_final, z_comp;
   logic [27:0] Jump_Im;
 
   //Interfaces
   control_unit_if cuif();
-  request_unit_if ruif();
   program_counter_if pcif();
   alu_if aluif();
   register_file_if rfif();
+  IF_ID_if ifidif();
+  ID_EX_if idexif();
+  EX_MEM_if exmemif();
+  MEM_WB_if memwbif();
 
   //Port Map
   alu ALUDUT(aluif.aluf);
   register_file regDUT (CLK, nRST, rfif.rf);
   control_unit contDUT (cuif.cu);
-  request_unit reqDUT (CLK, nRST, ruif.ru);
   program_counter pcDUT (CLK, nRST, pcif.pc);
+  IF_ID IFID_DUT (CLK, nRST, ifidif.ifid);
+  ID_EX IDEX_DUT (CLK, nRST, idexif.idex);
+  EX_MEM EXMEM_DUT (CLK, nRST, exmemif.exmem);
+  MEM_WB MEMWB_DUT (CLK, nRST, memwbif.memwb);
 
   always_comb
   begin
@@ -58,10 +67,240 @@ begin
 	end
 	else
 	begin
-		dpif.halt <= cuif.Halt;
+		dpif.halt <= memwbif.Halt_out;
+	end
+end
+//assign dpif.halt = memwbif.Halt_out;
+always_comb
+begin
+  	if(cuif.ExtOP == 0)
+	begin
+		extImm [31:16] = '{default: '0};
+		extImm [15:0] = cuif.Imm;
+	end
+	else
+	begin
+		extImm [31:16] = (cuif.Imm[15] == 1) ? '{default: '1} : '{default: '0};
+		extImm [15:0] = cuif.Imm;
 	end
 end
 
+
+//Datapath
+
+
+//IF_ID
+assign ifidif.imemload = dpif.imemload;
+assign ifidif.ihit = dpif.ihit;
+assign ifidif.pcp4_in = PC_4;
+
+//ID_EX
+assign idexif.ihit = dpif.ihit;
+assign idexif.PCSrc_in = cuif.PCSrc;
+assign idexif.RegWrite_in = cuif.RegWrite;
+assign idexif.dWEN_in = cuif.dWEN;
+assign idexif.dREN_in = cuif.dREN;
+assign idexif.BNE_in = cuif.BNE;
+assign idexif.Halt_in = cuif.Halt;
+assign idexif.Jump_in = cuif.Jump;
+assign idexif.ALUSrc_in = cuif.ALUSrc;
+assign idexif.RegDest_in = cuif.RegDest;
+assign idexif.JumpSel_in = cuif.JumpSel;
+assign idexif.MemtoReg_in = cuif.MemtoReg;
+assign idexif.ALUOP_in = cuif.ALUOP;
+assign idexif.Rt_in = cuif.Rt;
+assign idexif.Rd_in = cuif.Rd;
+assign idexif.opcode_in = cuif.opcode_out;
+assign idexif.j25_in = cuif.j25;
+assign idexif.shamt_in = cuif.shamt;
+assign idexif.rdat1_in = rfif.rdat1;
+assign idexif.rdat2_in = rfif.rdat2;
+assign idexif.pcp4_in = ifidif.pcp4_out;
+assign idexif.extImm_in = extImm;
+
+
+//EX_MEM
+assign exmemif.dWEN_in = idexif.dWEN_out;
+assign exmemif.dREN_in = idexif.dREN_out;
+assign exmemif.RegWrite_in = idexif.RegWrite_out;
+assign exmemif.LUI_in = {idexif.extImm_out[15:0], 16'h0000};
+assign exmemif.Halt_in = idexif.Halt_out;
+assign exmemif.MemToReg_in = idexif.MemtoReg_out;
+assign exmemif.opcode_in = idexif.opcode_out;
+assign exmemif.Porto_in = aluif.Output;
+assign exmemif.pcp4_in = idexif.pcp4_out;
+assign exmemif.ihit = dpif.ihit;
+assign exmemif.dhit = dpif.dhit;
+assign exmemif.dmemstr_in = idexif.rdat2_out;
+
+//M/WB
+assign memwbif.Halt_in = exmemif.Halt_out;
+assign memwbif.RegWrite_in = exmemif.RegWrite_out;
+assign memwbif.MemToReg_in = exmemif.MemToReg_out;
+assign memwbif.wsel_in = exmemif.wsel_out;
+assign memwbif.opcode_in = exmemif.opcode_out;
+assign memwbif.pcp4_in = exmemif.pcp4_out;
+assign memwbif.LUI_in = exmemif.LUI_out;
+assign memwbif.Porto_in = exmemif.Porto_out;
+assign memwbif.dmemload_in = dpif.dmemload;
+assign memwbif.ihit = dpif.ihit;
+assign memwbif.dhit = dpif.dhit;
+
+
+//Comparator
+always_comb
+begin
+	if((idexif.rdat1_out - idexif.rdat2_out) == 0)
+		z_comp = 1;
+	else
+		z_comp = 0;
+end
+
+
+//Register File
+assign rfif.wsel = memwbif.wsel_out;
+assign rfif.WEN = memwbif.RegWrite_out;// & (memwbif.dhit | memwbif.ihit); //do we need this?
+assign rfif.rsel1 = cuif.Rs;
+assign rfif.rsel2 = cuif.Rt;
+always_comb
+begin
+	if (memwbif.MemToReg_out == 2'b0)
+		rfif.wdat = memwbif.Porto_out;
+	else if (memwbif.MemToReg_out == 2'b01)
+		rfif.wdat = memwbif.dmemload_out;
+	else if (memwbif.MemToReg_out == 2'b10)
+		rfif.wdat = memwbif.LUI_out;
+	else
+		rfif.wdat = memwbif.pcp4_out;
+end
+
+always_comb
+begin
+	if (idexif.RegDest_out == 2'b0)
+		exmemif.wsel_in = idexif.Rt_out;
+	else if (idexif.RegDest_out == 2'b1)
+		exmemif.wsel_in = idexif.Rd_out;
+	else if (idexif.RegDest_out == 2'b10)
+		exmemif.wsel_in = 31;
+	else
+		exmemif.wsel_in = idexif.Rt_out;
+end
+//ALU 
+assign aluif.PortA = idexif.rdat1_out;
+assign aluif.ALUOP = idexif.ALUOP_out;
+always_comb
+begin
+	if (idexif.ALUSrc_out == 2'b0)
+		aluif.PortB = idexif.shamt_out;
+	else if (idexif.ALUSrc_out == 2'b01)
+		aluif.PortB = idexif.rdat2_out;
+	else if (idexif.ALUSrc_out == 2'b10)
+		aluif.PortB = idexif.extImm_out;
+	else
+		aluif.PortB = idexif.extImm_out;
+end
+
+//PC
+assign pcif.PCEN = dpif.ihit & ~dpif.halt;
+logic [31:0] jumpaddr;
+logic [31:0] branchAddr;
+assign jumpaddr = {PC_4[31:28],idexif.j25_out, 2'b00};
+assign branchAddr = (idexif.extImm_out << 2) + idexif.pcp4_out;
+
+/*logic [31:0] Branch;
+logic [31:0] Branch_in;*/
+always_comb
+begin
+	Branch = idexif.extImm_out << 2;
+	Branch_in = Branch + PC_4;
+	if(idexif.BNE_out == 0)
+		z_final = z_comp;
+	else
+		z_final = ~z_comp;
+end
+always_comb
+begin
+	if((z_final & idexif.PCSrc_out))
+		Branch_final = branchAddr;
+	else
+		Branch_final = PC_4;
+end
+
+always_comb
+begin
+	if(idexif.JumpSel_out == 2'b0)
+		pcif.PCNext = PC_4;
+	else if(idexif.JumpSel_out == 2'b01)
+		pcif.PCNext = Branch_final;
+	else if(idexif.JumpSel_out == 2'b10)
+		pcif.PCNext = idexif.rdat1_out;
+	else
+		pcif.PCNext = jumpaddr;
+end
+
+always_comb
+begin
+	if(idexif.Jump_out | (z_final & idexif.PCSrc_out) && dpif.ihit)
+	begin
+		idexif.flush = 1;
+		ifidif.flush = 1;
+	end
+	else
+	begin
+		idexif.flush = 0;
+		ifidif.flush = 0;
+	end
+end
+
+
+//assign idexif.flush	= idexif.Jump_out | z_final;
+//assign ifidif.flush = idexif.Jump_out | z_final;
+
+//Request Unit
+//Check the logic
+/*always_ff @(posedge CLK, negedge nRST)
+begin
+	if(!nRST)
+	begin
+		dpif.dmemWEN <= 0;
+		dpif.dmemREN <= 0;
+	end
+	else
+	begin
+		if(dpif.dhit)
+		begin
+			dpif.dmemWEN <= 0;
+			dpif.dmemREN <= 0;
+		end
+		else
+		begin
+			dpif.dmemWEN <= exmemif.dWEN_out;
+			dpif.dmemREN <= exmemif.dREN_out;
+		end
+	end
+end*/
+assign dpif.dmemWEN = exmemif.dWEN_out;
+assign dpif.dmemREN = exmemif.dREN_out;
+/*assign dpif.dmemWEN = (dpif.dhit) ? 0 : exmemif.dWEN_out;
+assign dpif.dmemREN = (dpif.dhit) ? 0 : exmemif.dREN_out;*/
+assign dpif.dmemaddr = exmemif.Porto_out;
+assign dpif.dmemstore = exmemif.dmemstr_out;
+assign dpif.imemaddr = pcif.PCOut;
+assign dpif.imemREN = 1;
+
+//Control Unit
+assign cuif.Instr = ifidif.instr;
+
+assign exmemif.flush = dpif.dhit;
+/*always_comb
+begin
+	if (idexif.JumpSel_out == 2'b0)
+		pcif.PCNext = idexif.pcp4_out;
+	else if (idexif.JumpSel_out == 2'b01)
+		pcif.PCNext = idexif.jumpaddr;
+	else if (idexif.JumpSel_out == 2'b10)
+		pcif.PCNext = idexif.*/
+/*
   //Datapath
   
  // assign dpif.halt = cuif.Halt;
@@ -72,14 +311,6 @@ end
   assign dpif.dmemstore = rfif.rdat2;
   assign dpif.dmemaddr = aluif.Output;
 
-  //Request Unit
-
-  assign ruif.dWEN = cuif.dWEN;
-  assign ruif.dREN = cuif.dREN;
-  assign ruif.dhit = dpif.dhit;
-  assign ruif.ihit = dpif.ihit;
-  assign pcif.PCEN = ruif.PCEN & ~cuif.Halt;
-  
   //Control Unit
 
   assign cuif.Instr = dpif.imemload;
@@ -149,21 +380,6 @@ end
   assign aluif.ALUOP = cuif.ALUOP;
 
   //ALUSrc logic
-
-  always_comb
-  begin
-  	if(cuif.ExtOP == 0)
-	begin
-		Imm_ext [31:16] = '{default: '0};
-		Imm_ext [15:0] = cuif.Imm;
-	end
-	else
-	begin
-		Imm_ext [31:16] = (cuif.Imm[15] == 1) ? '{default: '1} : '{default: '0};
-		Imm_ext [15:0] = cuif.Imm;
-	end
-	
-  end
  
   always_comb
   begin
@@ -172,14 +388,14 @@ end
 	else if(cuif.ALUSrc == 2'b01)
 		aluif.PortB = cuif.shamt;
 	else
-		aluif.PortB = Imm_ext;
+		aluif.PortB = extImm;
   end
 
   //Program Counter
   
   always_comb
   begin
-	Branch = Imm_ext << 2;
+	Branch = extImm << 2;
 	Branch_in = Branch + PC_4;
 	if(cuif.BNE == 0)
 		z_final = aluif.zero;
@@ -221,6 +437,6 @@ end
 	begin
 		pcif.PCNext = JumpVal;
 	end
-  end
+  end*/
  
 endmodule

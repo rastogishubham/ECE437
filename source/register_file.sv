@@ -9,7 +9,7 @@ module register_file
 	register_file_if.rf rfif
 );
 	word_t register [31:0];
-	always_ff @ (posedge CLK, negedge nRST)
+	always_ff @ (negedge CLK, negedge nRST)
 	begin
 		if(nRST == 0)
 			register <= '{default: '0};

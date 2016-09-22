@@ -12,29 +12,6 @@ module request_unit (
 		reqif.dmemWEN <= 0;
 		reqif.dmemREN <= 0;
 	end
-	/*else if(reqif.ihit && reqif.dREN)
-	begin
-		reqif.dmemREN <= reqif.dREN;
-	end
-	else if(reqif.ihit && reqif.dWEN)
-	begin
-		reqif.dmemWEN <= reqif.dWEN;
-	end*/
-	/*else if(reqif.ihit)
-	begin
-		reqif.dmemREN <= reqif.dREN;
-		reqif.dmemWEN <= reqif.dWEN;
-	end
-	else if(reqif.dhit)
-	begin
-		reqif.dmemWEN <= 0;
-		reqif.dmemREN <= 0;
-	end
-	else
-	begin
-		reqif.dmemWEN <= 0;
-		reqif.dmemREN <= 0;
-	end*/
 	else
 	begin
 		if(reqif.ihit)
