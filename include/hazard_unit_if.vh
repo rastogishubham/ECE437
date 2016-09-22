@@ -9,14 +9,14 @@ interface hazard_unit_if;
   import cpu_types_pkg::*;
 
   logic ihit, dhit, IFID_en, IDEX_en, EXMEM_en, MEMWB_en, PCEN; 
-  regbits_t Rs_ID, Wsel_ex, Wsel_mem;
+  regbits_t Rs_ID, Rt_ID, Wsel_ex, Wsel_mem;
 
   modport hz (
-    input ihit, dhit, Rs_ID, Wsel_mem, Wsel_ex,
+    input ihit, dhit, Rs_ID, Rt_ID, Wsel_mem, Wsel_ex,
     output IFID_en, IDEX_en, EXMEM_en, MEMWB_en, PCEN
   );
   modport tb (
-    output ihit, dhit, Rs_ID, Wsel_mem, Wsel_ex,
+    output ihit, dhit, Rs_ID, Rt_ID, Wsel_mem, Wsel_ex,
     input IFID_en, IDEX_en, EXMEM_en, MEMWB_en, PCEN
     );
   endinterface
