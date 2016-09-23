@@ -23,20 +23,6 @@ module EX_MEM (
   		end
       else
       begin
-        if(exmemif.flush)
-        begin
-          exmemif.dWEN_out <= '0; 
-          exmemif.dREN_out <= '0;
-          exmemif.RegWrite_out <= '0;
-          exmemif.LUI_out <= '0;
-          exmemif.Halt_out <= '0;
-          exmemif.MemToReg_out <= '0;
-          exmemif.wsel_out <= '0;
-          exmemif.opcode_out <= opcode_t'('0);
-          exmemif.Porto_out <= '0;
-          exmemif.pcp4_out <= '0;
-          exmemif.dmemstr_out <= '0;
-        end
   		  if(exmemif.ihit | exmemif.dhit)
   		  begin
           //exmemif.dWEN_out <= exmemif.dWEN_in;
@@ -60,6 +46,20 @@ module EX_MEM (
           begin
             exmemif.dWEN_out <= exmemif.dWEN_in;
             exmemif.dREN_out <= exmemif.dREN_in;
+          end
+          if(exmemif.flush)
+          begin
+            exmemif.dWEN_out <= '0; 
+            exmemif.dREN_out <= '0;
+            exmemif.RegWrite_out <= '0;
+            exmemif.LUI_out <= '0;
+            exmemif.Halt_out <= '0;
+            exmemif.MemToReg_out <= '0;
+            exmemif.wsel_out <= '0;
+            exmemif.opcode_out <= opcode_t'('0);
+            exmemif.Porto_out <= '0;
+            exmemif.pcp4_out <= '0;
+            exmemif.dmemstr_out <= '0;
           end
   		  end
       end

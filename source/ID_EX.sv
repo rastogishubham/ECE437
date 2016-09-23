@@ -23,6 +23,7 @@ module ID_EX (
         idexif.ALUOP_out <= aluop_t'('0);
         idexif.Rt_out <= '0;
         idexif.Rd_out <= '0;
+        idexif.Rs_out <= '0;
         idexif.opcode_out <= opcode_t'('0);
         idexif.j25_out <= '0;
         idexif.shamt_out <= '0;
@@ -49,6 +50,7 @@ module ID_EX (
           idexif.ALUOP_out <= aluop_t'('0);
           idexif.Rt_out <= '0;
           idexif.Rd_out <= '0;
+          idexif.Rs_out <= '0;
           idexif.opcode_out <= opcode_t'('0);
           idexif.j25_out <= '0;
           idexif.shamt_out <= '0;
@@ -73,6 +75,7 @@ module ID_EX (
           idexif.ALUOP_out <= idexif.ALUOP_in;
           idexif.Rt_out  <= idexif.Rt_in;
           idexif.Rd_out <= idexif.Rd_in;
+          idexif.Rs_out <= idexif.Rs_in;
           idexif.opcode_out <= idexif.opcode_in;
           idexif.j25_out <= idexif.j25_in;
           idexif.shamt_out <= idexif.shamt_in;
@@ -97,6 +100,7 @@ module ID_EX (
           idexif.ALUOP_out <= idexif.ALUOP_out;
           idexif.Rt_out  <= idexif.Rt_out;
           idexif.Rd_out <= idexif.Rd_out;
+          idexif.Rs_out <= idexif.Rs_out;
           idexif.opcode_out <= idexif.opcode_out;
           idexif.j25_out <= idexif.j25_out;
           idexif.shamt_out <= idexif.shamt_out;

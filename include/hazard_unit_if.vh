@@ -7,18 +7,17 @@
 interface hazard_unit_if;
   // import types
   import cpu_types_pkg::*;
- 
-  regbits_t Rs_EX, Rt_EX, Wsel_mem, Rt_mem, Wsel_wb;
-  word_t wdat_MEM, wdat_WB;
-  word_t read_val; 
+  logic RegWrite_mem, RegWrite_wb;
+  logic [1:0] Rs_Sel, Rt_Sel;
+  regbits_t Rs_EX, Rt_EX, Wsel_mem, Wsel_wb;
 
   modport hz (
-    input Rs_EX, Rt_ID, Wsel_mem, Rt_mem, Wsel_wb, wdat_MEM, wdat_WB,
-    output read_val;
+    input Rs_EX, Rt_EX, Wsel_mem, Wsel_wb, RegWrite_mem,
+    output Rs_Sel, Rt_Sel
   );
   modport tb (
-    output Rs_EX, Rt_ID, Wsel_mem, Rt_mem, Wsel_wb, wdat_MEM, wdat_WB,
-    input read_val;
+    output Rs_EX, Rt_EX, Wsel_mem, Wsel_wb, RegWrite_mem,
+    input Rs_Sel, Rt_Sel
     );
   endinterface
   `endif

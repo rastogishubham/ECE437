@@ -43,7 +43,7 @@ module datapath (
   ID_EX_if idexif();
   EX_MEM_if exmemif();
   MEM_WB_if memwbif();
-
+  hazard_unit_if huif();
   //Port Map
   alu ALUDUT(aluif.aluf);
   register_file regDUT (CLK, nRST, rfif.rf);
@@ -53,7 +53,7 @@ module datapath (
   ID_EX IDEX_DUT (CLK, nRST, idexif.idex);
   EX_MEM EXMEM_DUT (CLK, nRST, exmemif.exmem);
   MEM_WB MEMWB_DUT (CLK, nRST, memwbif.memwb);
-
+  hazard_unit HAZ_DUT (huif.hz);
   always_comb
   begin
 	PC_4 = pcif.PCOut + 4;
@@ -110,6 +110,7 @@ assign idexif.MemtoReg_in = cuif.MemtoReg;
 assign idexif.ALUOP_in = cuif.ALUOP;
 assign idexif.Rt_in = cuif.Rt;
 assign idexif.Rd_in = cuif.Rd;
+assign idexif.Rs_in = cuif.Rs;
 assign idexif.opcode_in = cuif.opcode_out;
 assign idexif.j25_in = cuif.j25;
 assign idexif.shamt_in = cuif.shamt;
@@ -185,15 +186,52 @@ begin
 	else
 		exmemif.wsel_in = idexif.Rt_out;
 end
+
+//Hazard Unit
+logic [31:0] floatymuxy;
+always_comb
+begin
+	if (exmemif.MemToReg_out == 2'b00)
+		floatymuxy = exmemif.Porto_out;
+	else if (exmemif.MemToReg_out == 2'b01)
+		floatymuxy = exmemif.LUI_out;
+	else if (exmemif.MemToReg_out == 2'b10)
+		floatymuxy = exmemif.pcp4_out;
+	else
+		floatymuxy = exmemif.LUI_out;
+end
+assign huif.Rs_EX = idexif.Rs_out;
+assign huif.Rt_EX = idexif.Rt_out;
+assign huif.Wsel_mem = exmemif.wsel_in;
+assign huif.Wsel_wb = memwbif.wsel_in;
+assign huif.RegWrite_mem = exmemif.RegWrite_out;
 //ALU 
-assign aluif.PortA = idexif.rdat1_out;
+//assign aluif.PortA = idexif.rdat1_out;
+always_comb
+begin
+	if (hzif.Rs_Sel == 2'b00)
+		aluif.PortA = idexif.rdat1_out;
+	else if (hzif.Rs_Sel == 2'b01)
+		aluif.PortA = floatymuxy;
+	else if (hzif.Rs_Sel == 2'b10)
+		aluif.PortA = rfif.wdat;
+	else 
+		aluif.PortA = idexif.rdat1_out;
+end
 assign aluif.ALUOP = idexif.ALUOP_out;
 always_comb
 begin
 	if (idexif.ALUSrc_out == 2'b0)
 		aluif.PortB = idexif.shamt_out;
 	else if (idexif.ALUSrc_out == 2'b01)
-		aluif.PortB = idexif.rdat2_out;
+	begin
+		if (hzif.Rt_sel == 2'b00)
+			aluif.PortB = idexif.rdat2_out;
+		else if(hzif.Rt_sel == 2'b01)
+			aluilf.PortB = floatymuxy;
+		else if (hzif.Rt_sel == 2'b10)
+			aluif.PortB = rfif.wdat;
+	end
 	else if (idexif.ALUSrc_out == 2'b10)
 		aluif.PortB = idexif.extImm_out;
 	else
