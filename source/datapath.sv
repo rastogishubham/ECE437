@@ -195,9 +195,9 @@ begin
 	if (exmemif.MemToReg_out == 2'b00)
 		floatymuxy = exmemif.Porto_out;
 	else if (exmemif.MemToReg_out == 2'b01)
-		floatymuxy = exmemif.LUI_out;
-	else if (exmemif.MemToReg_out == 2'b10)
 		floatymuxy = exmemif.pcp4_out;
+	else if (exmemif.MemToReg_out == 2'b10)
+		floatymuxy = exmemif.LUI_out;
 	else
 		floatymuxy = exmemif.LUI_out;
 end
