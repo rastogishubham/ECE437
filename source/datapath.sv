@@ -30,7 +30,7 @@ module datapath (
   parameter PC_INIT = 0;
 
   //Variables
-  word_t extImm, PC_4, Branch, Branch_in, JumpVal, Branch_final, LUI_val, floatymuxy, wdat_wb;
+  word_t extImm, PC_4, Branch, Branch_in, JumpVal, Branch_final, LUI_val, floatymuxy, wdat_wb, PortB_int;
   logic z_final, z_comp;
   logic [27:0] Jump_Im;
 
@@ -132,7 +132,7 @@ assign exmemif.Porto_in = aluif.Output;
 assign exmemif.pcp4_in = idexif.pcp4_out;
 assign exmemif.ihit = dpif.ihit;
 assign exmemif.dhit = dpif.dhit;
-assign exmemif.dmemstr_in = idexif.rdat2_out;
+assign exmemif.dmemstr_in = PortB_int;
 
 //M/WB
 assign memwbif.Halt_in = exmemif.Halt_out;
@@ -195,11 +195,11 @@ begin
 	if (exmemif.MemToReg_out == 2'b00)
 		floatymuxy = exmemif.Porto_out;
 	else if (exmemif.MemToReg_out == 2'b01)
-		floatymuxy = exmemif.pcp4_out;
+		floatymuxy = dpif.dmemload;
 	else if (exmemif.MemToReg_out == 2'b10)
 		floatymuxy = exmemif.LUI_out;
 	else
-		floatymuxy = exmemif.LUI_out;
+		floatymuxy = exmemif.pcp4_out;
 end
 assign hzif.Rs_EX = idexif.Rs_out;
 assign hzif.Rt_EX = idexif.Rt_out;
@@ -221,19 +221,25 @@ begin
 		aluif.PortA = idexif.rdat1_out;
 end
 assign aluif.ALUOP = idexif.ALUOP_out;
+
+
 always_comb
 begin
-	if (idexif.ALUSrc_out == 2'b0)
+	if (hzif.Rt_Sel == 2'b00)
+		PortB_int = idexif.rdat2_out;
+	else if(hzif.Rt_Sel == 2'b01)
+		PortB_int = floatymuxy;
+	else if (hzif.Rt_Sel == 2'b10)
+		PortB_int = wdat_wb;
+end
+
+always_comb
+begin
+	if (idexif.ALUSrc_out == 2'b01)
 		aluif.PortB = idexif.shamt_out;
-	else if (idexif.ALUSrc_out == 2'b01)
+	else if (idexif.ALUSrc_out == 2'b00)
 	begin
-		//aluif.PortB = idexif.rdat2_out;
-		if (hzif.Rt_Sel == 2'b00)
-			aluif.PortB = idexif.rdat2_out;
-		else if(hzif.Rt_Sel == 2'b01)
-			aluif.PortB = floatymuxy;
-		else if (hzif.Rt_Sel == 2'b10)
-			aluif.PortB = wdat_wb;
+		aluif.PortB = PortB_int;
 	end
 	else if (idexif.ALUSrc_out == 2'b10)
 		aluif.PortB = idexif.extImm_out;
