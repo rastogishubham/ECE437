@@ -159,8 +159,16 @@ add wave -noupdate -group memwbif /system_tb/DUT/CPU/DP/memwbif/pcp4_out
 add wave -noupdate -group memwbif /system_tb/DUT/CPU/DP/memwbif/LUI_out
 add wave -noupdate -group memwbif /system_tb/DUT/CPU/DP/memwbif/Porto_out
 add wave -noupdate -group memwbif /system_tb/DUT/CPU/DP/memwbif/dmemload_out
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/RegWrite_mem
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/RegWrite_wb
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/Rs_Sel
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/Rt_Sel
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/Rs_EX
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/Rt_EX
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/Wsel_mem
+add wave -noupdate -expand -group hzif /system_tb/DUT/CPU/DP/hzif/Wsel_wb
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {508478 ps} 0}
+WaveRestoreCursors {{Cursor 1} {129288117 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -176,4 +184,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ps} {621984 ps}
+WaveRestoreZoom {0 ps} {1379448 ns}

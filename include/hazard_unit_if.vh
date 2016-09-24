@@ -12,11 +12,11 @@ interface hazard_unit_if;
   regbits_t Rs_EX, Rt_EX, Wsel_mem, Wsel_wb;
 
   modport hz (
-    input Rs_EX, Rt_EX, Wsel_mem, Wsel_wb, RegWrite_mem,
+    input Rs_EX, Rt_EX, Wsel_mem, Wsel_wb, RegWrite_mem, RegWrite_wb,
     output Rs_Sel, Rt_Sel
   );
   modport tb (
-    output Rs_EX, Rt_EX, Wsel_mem, Wsel_wb, RegWrite_mem,
+    output Rs_EX, Rt_EX, Wsel_mem, Wsel_wb, RegWrite_mem, RegWrite_wb,
     input Rs_Sel, Rt_Sel
     );
   endinterface
