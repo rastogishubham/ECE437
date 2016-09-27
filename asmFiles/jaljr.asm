@@ -16,20 +16,12 @@ end:
 braR:
   or    $3, $zero, $ra
   sw    $ra, 8($2)
-  nop
-  nop
-  nop
-  nop
   jal   jmpR
   lw $20, 12($2)
   halt
   sw    $1, 12($2)
-
-  nop
-  nop
-  nop
 jmpR:
-  sw $20, 12($2)
+  #sw $20, 12($2)
   jr $31
   bne   $ra, $3, end
   halt
