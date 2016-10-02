@@ -208,6 +208,8 @@ assign hzif.Wsel_wb = memwbif.wsel_out;
 assign hzif.RegWrite_mem = exmemif.RegWrite_out;
 assign hzif.RegWrite_wb = memwbif.RegWrite_out;
 assign hzif.ex_op = idexif.opcode_out;
+assign hzif.Rs_ID = cuif.Rs;
+assign hzif.Rt_ID = cuif.Rt;
 //ALU 
 //assign aluif.PortA = idexif.rdat1_out;
 
