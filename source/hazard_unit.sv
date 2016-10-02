@@ -30,5 +30,10 @@ begin
 	begin
 		hzif.Rt_Sel = 2'b00;
 	end
+	if(hzif.ex_op == LW || hzif.ex_op == SW)
+		hzif.flush_ls = 1;
+	else
+		hzif.flush_ls = 0;
+		
 end
 endmodule 

@@ -91,7 +91,7 @@ end
 
 //IF_ID
 assign ifidif.imemload = dpif.imemload;
-assign ifidif.ihit = dpif.ihit;
+assign ifidif.ihit = dpif.ihit & ~hzif.flush_ls;
 assign ifidif.pcp4_in = PC_4;
 
 //ID_EX
@@ -207,6 +207,7 @@ assign hzif.Wsel_mem = exmemif.wsel_out;
 assign hzif.Wsel_wb = memwbif.wsel_out;
 assign hzif.RegWrite_mem = exmemif.RegWrite_out;
 assign hzif.RegWrite_wb = memwbif.RegWrite_out;
+assign hzif.ex_op = idexif.opcode_out;
 //ALU 
 //assign aluif.PortA = idexif.rdat1_out;
 
@@ -265,7 +266,7 @@ begin
 end
 
 //PC
-assign pcif.PCEN = dpif.ihit & ~dpif.halt;
+assign pcif.PCEN = dpif.ihit & ~dpif.halt & ~hzif.flush_ls;
 logic [31:0] jumpaddr;
 logic [31:0] branchAddr;
 assign jumpaddr = {PC_4[31:28],idexif.j25_out, 2'b00};
@@ -304,17 +305,25 @@ end
 
 always_comb
 begin
-	if(idexif.Jump_out | (z_final & idexif.PCSrc_out) && dpif.ihit)
+	if((hzif.flush_ls | idexif.Jump_out | (z_final & idexif.PCSrc_out)) && dpif.ihit)
 	begin
 		idexif.flush = 1;
-		ifidif.flush = 1;
 	end
 	else
 	begin
 		idexif.flush = 0;
+	end
+	if(idexif.Jump_out | (z_final & idexif.PCSrc_out) && dpif.ihit)
+	begin
+		ifidif.flush = 1;
+	end
+	else
+	begin
 		ifidif.flush = 0;
 	end
 end
+
+	
 
 
 //assign idexif.flush	= idexif.Jump_out | z_final;
