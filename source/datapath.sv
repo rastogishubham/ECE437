@@ -67,7 +67,9 @@ begin
 	end
 	else
 	begin
-		dpif.halt <= exmemif.Halt_out | dpif.halt; 
+	//	dpif.halt <= memwbif.Halt_out; 
+		if(exmemif.Halt_out)
+			dpif.halt <= 1;
 	end
 end
 //assign dpif.halt = memwbif.Halt_out;
