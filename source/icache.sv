@@ -37,10 +37,10 @@ begin
 	end
 end
 assign icachef = icachef_t'(dicif.imemaddr);
-assign dicif.ihit = (cachetab[icachef.idx].tag == dicif.imemaddr[31:5]) ? (cachetab[icachef.idx].v): 0;
+assign dicif.ihit = ((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v && dicif.imemREN);
 assign dicif.imemload = cachetab[icachef.idx].data;
 assign cicif.iaddr = dicif.imemaddr; 
-assign cicif.iREN = dicif.imemREN;
+assign cicif.iREN = ((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v && dicif.imemREN);
 endmodule
 /*always_comb
 begin

@@ -49,7 +49,11 @@ interface datapath_cache_if;
     input   imemREN, imemaddr,
     output  ihit, imemload
   );
-
+  //icache test bench
+  modport icache_tb (
+    output   imemREN, imemaddr,
+    input  ihit, imemload
+  );
   // dcache ports
   modport dcache (
     input   halt, dmemREN, dmemWEN,
