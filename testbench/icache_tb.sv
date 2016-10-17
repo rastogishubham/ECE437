@@ -61,12 +61,31 @@ begin
 	end
 	if (tb_ca.iREN == 1)
 	begin
-		$display("Passed 3");
+		$display("Failed 3");
 	end
 	else
 	begin
-		$display("Failed 3");
+		$display("Passed 3");
 	end
+	@(negedge CLK);
+	tb_dp.imemaddr = 32'b10101010101010101010101011000110;
+	tb_ca.iwait = 1;
+	@(negedge CLK);
+	tb_ca.iwait = 0;
+	tb_ca.iload = 32'hDEADB00B;
+	@(negedge CLK);
+	tb_dp.imemaddr = 32'b10101010101010101010101001001010;
+	tb_ca.iwait = 1;
+	@(negedge CLK);
+	tb_ca.iwait = 0;
+	tb_ca.iload = 32'hB00BDEAD;
+	@(negedge CLK);
+	tb_dp.imemaddr = 32'b10100010101010101010101001001010; //Incorrect Tag test
+	tb_ca.iwait = 1;
+	@(negedge CLK);
+	@(negedge CLK);
+	tb_ca.iwait = 0;
+	tb_ca.iload = 32'h5EC50000;
 	@(negedge CLK);
 	$finish;
 end

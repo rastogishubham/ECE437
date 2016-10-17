@@ -1,12 +1,13 @@
 `include "cpu_types_pkg.vh"
 `include "datapath_cache_if.vh"
 `include "caches_if.vh"
+import cpu_types_pkg::*;
 module icache (
 	input CLK, nRST,
 	datapath_cache_if.icache dicif,
 	caches_if.icache cicif
 );
-import cpu_types_pkg::*;
+
 typedef struct packed {
 	logic v;
 	logic [ITAG_W - 1:0] tag;
@@ -40,14 +41,5 @@ assign icachef = icachef_t'(dicif.imemaddr);
 assign dicif.ihit = ((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v && dicif.imemREN);
 assign dicif.imemload = cachetab[icachef.idx].data;
 assign cicif.iaddr = dicif.imemaddr; 
-assign cicif.iREN = ((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v && dicif.imemREN);
+assign cicif.iREN = (!((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v) && dicif.imemREN);
 endmodule
-/*always_comb
-begin
-	if (dicif.imemREN && !cicif.iwait)
-	begin
-		icache_table.tag = dicif.imemaddr[31:5];
-		icache_table.v = 1;
-
-end
-*/
