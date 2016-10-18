@@ -100,7 +100,7 @@ end
 always_comb
 begin
 	next_state = state;
-	next_LRU = 0;
+	//next_LRU = 0;
 	next_data = 0;
 	next_tag = 0;
 	next_v = 0;
@@ -183,7 +183,7 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			next_LRU = 0;
+		//	next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			cdcif.daddr = {dcache_tab[dcachef.idx].set[LRU_idx].tag, dcachef.idx, 3'b000};
@@ -200,7 +200,7 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			next_LRU = 0;
+			//next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			cdcif.daddr = {dcache_tab[dcachef.idx].set[LRU_idx].tag, dcachef.idx, 3'b100};
@@ -230,7 +230,7 @@ begin
 				next_dirty = 0;
 				next_data = cdcif.dload;
 				next_state = LD2;
-				next_LRU = LRU_idx;
+			//	next_LRU = LRU_idx;
 				cacheWEN = 1;
 				load_WEN = 2'b01;
 			end
@@ -251,7 +251,7 @@ begin
 				next_dirty = 0;
 				next_data = cdcif.dload;
 				next_state = IDLE;
-				next_LRU = LRU_idx;
+				//next_LRU = LRU_idx;
 				cacheWEN = 1;
 				load_WEN = 2'b10;
 			end
@@ -263,7 +263,7 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			next_LRU = 0;
+			//next_LRU = 0;
 			if (!dcache_tab[count[2:0]].set[0].dirty && !dcache_tab[count[2:0]].set[1].dirty)
 				n_count = count + 1;
 			if (count != 4'd15)
@@ -283,7 +283,7 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			next_LRU = 0;
+			//next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			n_count = count + 1;
@@ -301,7 +301,7 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			next_LRU = 0;
+			//next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			cdcif.daddr = {dcache_tab[count[2:0]].set[count[3]].tag, count[2:0], 3'b100};
@@ -317,7 +317,7 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			next_LRU = 0;
+		//	next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.daddr = 32'h00003100;
 			cdcif.dstore = match_count;
@@ -332,7 +332,7 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			next_LRU = 0;
+		//	next_LRU = 0;
 			next_state = HALT;
 			match_count = 0;
 			ddcif.flushed = 1;
