@@ -36,7 +36,7 @@ word_t next_data;
 logic next_LRU;
 logic cacheWEN;
 logic [3:0] n_count;
-word_t match_count;
+logic signed [31:0] match_count;
 logic dhit_int;
 logic [1:0] load_WEN;
 typedef enum logic [3:0] {IDLE, WB1, WB2, LD1, LD2, FLUSH1, FLUSH2, FLUSH3, WRITE_COUNT, HALT} 
@@ -107,11 +107,17 @@ begin
 	next_dirty = 0;
 	load_WEN = 2'b0;
 	cacheWEN = 0;
+	if(ddcif.dhit)
+		match_count += 1;
+	else if(~(match1 | match2) & (ddcif.dmemREN | ddcif.dmemWEN) & ddcif.dhit)
+		match_count -= 1;
+	else
+		match_count += 0;
 	case(state)
 		IDLE: begin
 			n_count = 0;
-
 			cacheWEN = 0;
+			cdcif.dREN = 0;
 			if(!match1 && !match2 & (ddcif.dmemWEN | ddcif.dmemREN))
 			begin
 				if(LRU_idx == 0)
@@ -131,17 +137,21 @@ begin
 			end
 			else if((match1 | match2) & ddcif.dmemREN)
 			begin
-				match_count += 1;
-				ddcif.dhit = 1;
 				if(match1)
+				begin
+					next_LRU = 1;
+					cacheWEN = 1;
 					ddcif.dmemload = dcache_tab[dcachef.idx].set[0].data[blockoff];
+				end
 				else
+				begin
+					cacheWEN = 1;
+					next_LRU = 0;
 					ddcif.dmemload = dcache_tab[dcachef.idx].set[1].data[blockoff];
+				end
 			end
 			else if((match1 | match2) & ddcif.dmemWEN)
 			begin
-				match_count += 1;
-				ddcif.dhit = 1;
 				if(match1)
 				begin
 					cacheWEN = 1;
@@ -216,7 +226,7 @@ begin
 			else
 			begin
 				next_tag  = dcachef.tag;
-				next_v = 1;
+				next_v = 0;
 				next_dirty = 0;
 				next_data = cdcif.dload;
 				next_state = LD2;
@@ -327,6 +337,17 @@ begin
 			match_count = 0;
 			ddcif.flushed = 1;
 		end
+		default: begin
+			next_state = state;
+			next_LRU = 0;
+			next_data = 0;
+			next_tag = 0;
+			next_v = 0;
+			next_dirty = 0;
+			load_WEN = 2'b0;
+			cacheWEN = 0;
+			match_count = 0;
+		end
 	endcase
 end
 
@@ -341,4 +362,5 @@ assign match2 = (dcache_tab[dcachef.idx].set[1].tag == dcachef.tag)
 				//& (ddcif.dmemREN | ddcif.dmemWEN);
 assign dirty2 = dcache_tab[dcachef.idx].set[1].dirty;
 assign blockoff = dcachef.blkoff;
+assign ddcif.dhit = ((match1 | match2) & (ddcif.dmemREN | ddcif.dmemWEN));
 endmodule
