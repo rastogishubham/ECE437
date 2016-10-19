@@ -21,23 +21,10 @@ typedef struct packed {
 
 dcache_frame [7:0] dcache_tab;
 dcachef_t dcachef;
-logic match1;
-logic match2;
-logic dirty1;
-logic dirty2;
-logic LRU_idx;
-logic blockoff;
-logic [3:0] count;
-
-logic next_dirty;
+logic match1, match2, dirty1, dirty2, LRU_idx, blockoff, next_dirty, next_v, next_LRU, cacheWEN, match_idx;
+logic [3:0] count, n_count;
 logic [25:0] next_tag;
-logic next_v;
-word_t next_data;
-logic next_LRU;
-logic cacheWEN;
-logic [3:0] n_count;
-logic signed [31:0] match_count;
-logic dhit_int;
+word_t next_data, match_count;
 logic [1:0] load_WEN;
 typedef enum logic [3:0] {IDLE, WB1, WB2, LD1, LD2, FLUSH1, FLUSH2, FLUSH3, WRITE_COUNT, HALT} 
 state_type;
@@ -69,10 +56,10 @@ begin
 		count <= n_count;
 		if (cacheWEN & load_WEN == 0)
 		begin
-			dcache_tab[dcachef.idx].set[LRU_idx].dirty <= next_dirty;
-			dcache_tab[dcachef.idx].set[LRU_idx].v <= next_v;
-			dcache_tab[dcachef.idx].set[LRU_idx].tag <= next_tag;
-			dcache_tab[dcachef.idx].set[LRU_idx].data[blockoff] <= next_data;
+			dcache_tab[dcachef.idx].set[match_idx].dirty <= next_dirty;
+			dcache_tab[dcachef.idx].set[match_idx].v <= next_v;
+			dcache_tab[dcachef.idx].set[match_idx].tag <= next_tag;
+			dcache_tab[dcachef.idx].set[match_idx].data[blockoff] <= next_data;
 			dcache_tab[dcachef.idx].LRU <= next_LRU;
 		end
 		else
@@ -100,7 +87,6 @@ end
 always_comb
 begin
 	next_state = state;
-	//next_LRU = 0;
 	next_data = 0;
 	next_tag = 0;
 	next_v = 0;
@@ -183,7 +169,6 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-		//	next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			cdcif.daddr = {dcache_tab[dcachef.idx].set[LRU_idx].tag, dcachef.idx, 3'b000};
@@ -200,7 +185,6 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			//next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			cdcif.daddr = {dcache_tab[dcachef.idx].set[LRU_idx].tag, dcachef.idx, 3'b100};
@@ -218,7 +202,7 @@ begin
 		LD1: begin
 			cdcif.dWEN = 0;
 			cdcif.dREN = 1;
-			cdcif.daddr = {dcache_tab[dcachef.idx].set[LRU_idx].tag, dcachef.idx, 3'b000};
+			cdcif.daddr = {dcachef.tag, dcachef.idx, 3'b000};
 			if(cdcif.dwait)
 			begin
 				next_state = LD1;
@@ -230,7 +214,6 @@ begin
 				next_dirty = 0;
 				next_data = cdcif.dload;
 				next_state = LD2;
-			//	next_LRU = LRU_idx;
 				cacheWEN = 1;
 				load_WEN = 2'b01;
 			end
@@ -239,7 +222,7 @@ begin
 		LD2: begin
 			cdcif.dWEN = 0;
 			cdcif.dREN = 1;
-			cdcif.daddr = {dcache_tab[dcachef.idx].set[LRU_idx].tag, dcachef.idx, 3'b100};
+			cdcif.daddr = {dcachef.tag, dcachef.idx, 3'b100};
 			if(cdcif.dwait)
 			begin
 				next_state = LD2;
@@ -251,7 +234,6 @@ begin
 				next_dirty = 0;
 				next_data = cdcif.dload;
 				next_state = IDLE;
-				//next_LRU = LRU_idx;
 				cacheWEN = 1;
 				load_WEN = 2'b10;
 			end
@@ -263,17 +245,14 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			//next_LRU = 0;
 			if (!dcache_tab[count[2:0]].set[0].dirty && !dcache_tab[count[2:0]].set[1].dirty)
 				n_count = count + 1;
 			if (count != 4'd15)
 			begin
-				//n_count = count;
 				next_state = FLUSH2;
 			end
 			else
 			begin
-				//n_count = count;
 				next_state = WRITE_COUNT;
 			end
 		end
@@ -283,7 +262,6 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			//next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			n_count = count + 1;
@@ -301,7 +279,6 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-			//next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
 			cdcif.daddr = {dcache_tab[count[2:0]].set[count[3]].tag, count[2:0], 3'b100};
@@ -317,7 +294,6 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-		//	next_LRU = 0;
 			cdcif.dWEN = 1;
 			cdcif.daddr = 32'h00003100;
 			cdcif.dstore = match_count;
@@ -332,7 +308,6 @@ begin
 			next_v = 0;
 			next_tag = 0;
 			next_dirty = 0;
-		//	next_LRU = 0;
 			next_state = HALT;
 			match_count = 0;
 			ddcif.flushed = 1;
@@ -355,12 +330,11 @@ assign LRU_idx = dcache_tab[dcachef.idx].LRU;
 assign dcachef = dcachef_t'(ddcif.dmemaddr);
 assign match1 = (dcache_tab[dcachef.idx].set[0].tag == dcachef.tag) 
 				& dcache_tab[dcachef.idx].set[0].v;
-				//& (ddcif.dmemREN | ddcif.dmemWEN);
 assign dirty1 = dcache_tab[dcachef.idx].set[0].dirty;
 assign match2 = (dcache_tab[dcachef.idx].set[1].tag == dcachef.tag) 
 				& dcache_tab[dcachef.idx].set[1].v;
-				//& (ddcif.dmemREN | ddcif.dmemWEN);
 assign dirty2 = dcache_tab[dcachef.idx].set[1].dirty;
 assign blockoff = dcachef.blkoff;
 assign ddcif.dhit = ((match1 | match2) & (ddcif.dmemREN | ddcif.dmemWEN));
+assign match_idx = (match1) ? 0 : ((match2) ? 1 : 0);
 endmodule

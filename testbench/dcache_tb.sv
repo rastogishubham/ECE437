@@ -87,6 +87,7 @@ begin
 	tb_dp.dmemREN = 0;
 	tb_dp.dmemaddr = 32'b10000000000000000000000000000000;
 	@(posedge tb_dp.flushed)
+	@(posedge CLK);
 	$finish;
 end
 endprogram
