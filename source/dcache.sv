@@ -237,8 +237,14 @@ begin
 		FLUSH1: begin
 			cacheWEN = 0;
 			if (!dcache_tab[count[2:0]].set[0].dirty && !dcache_tab[count[2:0]].set[1].dirty)
+			begin
 				n_count = count + 1;
-			if (count != 4'd15)
+				if(count != 4'd15)
+					next_state = FLUSH1;
+				else
+					next_state = WRITE_COUNT;
+			end
+			else if (count != 4'd15)
 			begin
 				next_state = FLUSH2;
 			end
@@ -251,13 +257,14 @@ begin
 			cacheWEN = 0;
 			cdcif.dWEN = 1;
 			cdcif.dREN = 0;
-			n_count = count + 1;
 			cdcif.daddr = {dcache_tab[count[2:0]].set[count[3]].tag, count[2:0], 3'b000};
 			cdcif.dstore = dcache_tab[count[2:0]].set[count[3]].data[0];
 			if(cdcif.dwait)
 				next_state = FLUSH2;
 			else
+			begin
 				next_state = FLUSH3;
+			end
 		end
 
 		FLUSH3: begin
@@ -269,7 +276,12 @@ begin
 			if(cdcif.dwait)
 				next_state = FLUSH3;
 			else
+			begin
 				next_state = FLUSH1;
+				n_count = count + 1;
+				if(count == 4'd15)
+					next_state = WRITE_COUNT;
+			end
 		end
 		WRITE_COUNT: begin
 			cacheWEN = 0;
@@ -299,6 +311,12 @@ begin
 		//	match_countup = 0;
 			//match_countdown = 0;
 			ddcif.flushed = 0;
+			cdcif.dWEN = 0;
+			cdcif.dREN = 0;
+			cdcif.dstore = 0;
+			cdcif.daddr = 0;
+			ddcif.dmemload = 0;
+			//ddcif.dmemaddr = 0;
 		end
 	endcase
 end
