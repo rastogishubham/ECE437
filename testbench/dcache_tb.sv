@@ -77,11 +77,22 @@ begin
 	tb_ca.dload = 32'hBEEFDEAD;
 	@(posedge CLK);
 	@(posedge CLK);
-	tb_dp.dmemaddr = 32'b00000000000000000000001111000000;
+	/*tb_dp.dmemaddr = 32'b00000000000000000000001111000000;
 	tb_dp.dmemREN = 1;
 	tb_dp.dmemWEN = 0;
-	@(posedge tb_dp.dhit);
+	tb_ca.dwait = 1;
 	@(posedge CLK);
+	tb_ca.dwait = 0;
+	@(posedge CLK);
+	tb_ca.dwait = 1;
+	@(posedge CLK);
+	tb_ca.dwait = 0;
+	@(posedge CLK);
+	tb_ca.dwait = 1;
+	@(posedge CLK);
+	tb_ca.dwait = 0;
+	@(posedge CLK);
+	@(posedge tb_dp.dhit);*/
 	tb_dp.halt = 1;
 	tb_dp.dmemWEN = 0;
 	tb_dp.dmemREN = 0;
