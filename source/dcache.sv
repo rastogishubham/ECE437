@@ -41,7 +41,7 @@ begin
 		 state <= next_state;
 end
 
-always_ff @(posedge CLK or negedge nRST) 
+always_ff @(posedge CLK, negedge nRST) 
 begin
 	if(~nRST)
 	begin
@@ -66,6 +66,31 @@ begin
 	end
 end
 
+always_ff @(posedge ddcif.dhit, negedge nRST)
+begin
+	if(~nRST) 
+	begin
+		 match_countup <= 0;
+	end
+	else 
+	begin
+		 match_countup <= match_countup + 1;
+	end
+end
+
+always_ff @(negedge cdcif.dwait, negedge nRST)
+begin
+	if(~nRST) 
+	begin
+		 match_countdown <= 0;
+	end
+	else 
+	begin
+		if(state == LD2)
+			match_countdown <= match_countdown + 1;
+	end
+end
+
 always_comb
 begin
 	next_state = state;
@@ -82,7 +107,7 @@ begin
 			cdcif.dREN = 0;
 			if(!match1 && !match2 & (ddcif.dmemWEN | ddcif.dmemREN))
 			begin
-				match_countdown += 1;
+				//match_countdown += 1;
 				if(LRU_idx == 0)
 				begin
 					if(dirty1)
@@ -100,7 +125,7 @@ begin
 			end
 			else if((match1 | match2) & ddcif.dmemREN)
 			begin
-				match_countup += 1;
+			//	match_countup += 1;
 				if(match1)
 				begin
 					next_LRU = 1;
@@ -116,7 +141,7 @@ begin
 			end
 			else if((match1 | match2) & ddcif.dmemWEN)
 			begin
-				match_countup += 1;
+			//	match_countup += 1;
 				if(match1)
 				begin
 					cacheWEN = 1;
@@ -205,6 +230,7 @@ begin
 				next_data = cdcif.dload;
 				next_state = IDLE;
 				cacheWEN = 1;
+				//match_countdown += 1;
 			end
 		end
 
@@ -258,8 +284,8 @@ begin
 		HALT: begin
 			cacheWEN = 0;
 			next_state = HALT;
-			match_countup = 0;
-			match_countdown = 0;
+		//	match_countup = 0;
+			//match_countdown = 0;
 			ddcif.flushed = 1;
 		end
 		default: begin
@@ -270,8 +296,8 @@ begin
 			next_v = 0;
 			next_dirty = 0;
 			cacheWEN = 0;
-			match_countup = 0;
-			match_countdown = 0;
+		//	match_countup = 0;
+			//match_countdown = 0;
 			ddcif.flushed = 0;
 		end
 	endcase
