@@ -26,7 +26,7 @@ blockoff, next_dirty, next_v, next_LRU, cacheWEN,
 match_idx, data_idx;
 logic [3:0] count, n_count;
 logic [25:0] next_tag;
-word_t next_data, match_countup, match_countdown;
+word_t next_data, match_countup, match_countdown, next_match_countup, next_match_countdown;
 typedef enum logic [3:0] {IDLE, WB1, WB2, LD1, LD2, FLUSH1, FLUSH2, FLUSH3, WRITE_COUNT, HALT} 
 state_type;
 state_type state, next_state;
@@ -55,6 +55,8 @@ begin
 	else
 	begin
 		count <= n_count;
+		match_countup <=  next_match_countup;
+		match_countdown <= next_match_countdown;
 		if (cacheWEN)
 		begin
 			dcache_tab[dcachef.idx].set[match_idx].dirty <= next_dirty;
@@ -66,7 +68,7 @@ begin
 	end
 end
 
-always_ff @(posedge ddcif.dhit, negedge nRST)
+/*always_ff @(posedge ddcif.dhit, negedge nRST)
 begin
 	if(~nRST) 
 	begin
@@ -89,7 +91,7 @@ begin
 		if(state == LD2)
 			match_countdown <= match_countdown + 1;
 	end
-end
+end*/
 
 always_comb
 begin
@@ -101,11 +103,25 @@ begin
 	next_LRU = LRU_idx;
 	cacheWEN = 0;
 	n_count = count;
+	ddcif.flushed = 0;
+	cdcif.dstore = 32'b0;
+	cdcif.daddr = 32'b0;
+	cdcif.dWEN = 0;
+	ddcif.dmemload = 32'b0;
+	cdcif.dREN = 0;
+	next_match_countdown = match_countdown;
+	next_match_countup = match_countup;
 	case(state)
 		IDLE: begin
 			n_count = 0;
 			cacheWEN = 0;
 			cdcif.dREN = 0;
+
+			if(ddcif.dhit)
+			begin
+				next_match_countup = match_countup + 1;
+			end
+
 			if(!match1 && !match2 & (ddcif.dmemWEN | ddcif.dmemREN))
 			begin
 				//match_countdown += 1;
@@ -231,7 +247,7 @@ begin
 				next_data = cdcif.dload;
 				next_state = IDLE;
 				cacheWEN = 1;
-				//match_countdown += 1;
+				next_match_countdown = match_countdown + 1;
 			end
 		end
 

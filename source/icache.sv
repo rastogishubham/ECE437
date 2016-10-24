@@ -4,7 +4,7 @@
 import cpu_types_pkg::*;
 module icache (
 	input CLK, nRST,
-	datapath_cache_if.icache dicif,
+	datapath_cache_if dicif,
 	caches_if.icache cicif
 );
 
@@ -38,7 +38,7 @@ begin
 	end
 end
 assign icachef = icachef_t'(dicif.imemaddr);
-assign dicif.ihit = ((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v && dicif.imemREN);
+assign dicif.ihit = ((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v && dicif.imemREN && ~dicif.dmemREN && ~dicif.dmemWEN);
 assign dicif.imemload = cachetab[icachef.idx].data;
 assign cicif.iaddr = dicif.imemaddr; 
 assign cicif.iREN = (!((cachetab[icachef.idx].tag == icachef.tag) && cachetab[icachef.idx].v) && dicif.imemREN);
