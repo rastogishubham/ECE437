@@ -100,6 +100,7 @@ begin
 	next_dirty = dcache_tab[dcachef.idx].set[match_idx].dirty;
 	next_LRU = LRU_idx;
 	cacheWEN = 0;
+	n_count = count;
 	case(state)
 		IDLE: begin
 			n_count = 0;
@@ -236,7 +237,8 @@ begin
 
 		FLUSH1: begin
 			cacheWEN = 0;
-			if (!dcache_tab[count[2:0]].set[0].dirty && !dcache_tab[count[2:0]].set[1].dirty)
+			cdcif.dWEN = 0;
+			if (!dcache_tab[count[2:0]].set[count[3]].dirty)
 			begin
 				n_count = count + 1;
 				if(count != 4'd15)
@@ -296,8 +298,6 @@ begin
 		HALT: begin
 			cacheWEN = 0;
 			next_state = HALT;
-		//	match_countup = 0;
-			//match_countdown = 0;
 			ddcif.flushed = 1;
 		end
 		default: begin
@@ -308,15 +308,13 @@ begin
 			next_v = 0;
 			next_dirty = 0;
 			cacheWEN = 0;
-		//	match_countup = 0;
-			//match_countdown = 0;
 			ddcif.flushed = 0;
 			cdcif.dWEN = 0;
 			cdcif.dREN = 0;
 			cdcif.dstore = 0;
 			cdcif.daddr = 0;
 			ddcif.dmemload = 0;
-			//ddcif.dmemaddr = 0;
+			n_count = 0;
 		end
 	endcase
 end
