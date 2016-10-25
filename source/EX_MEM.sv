@@ -61,6 +61,20 @@ module EX_MEM (
             exmemif.pcp4_out <= '0;
             exmemif.dmemstr_out <= '0;
           end
+          if(exmemif.Halt_out)
+          begin
+            exmemif.dWEN_out <= '0; 
+            exmemif.dREN_out <= '0;
+            exmemif.RegWrite_out <= '0;
+            exmemif.LUI_out <= '0;
+            exmemif.Halt_out <= 1;
+            exmemif.MemToReg_out <= '0;
+            exmemif.wsel_out <= '0;
+            exmemif.opcode_out <= opcode_t'('0);
+            exmemif.Porto_out <= '0;
+            exmemif.pcp4_out <= '0;
+            exmemif.dmemstr_out <= '0;
+          end
   		  end
       end
   	/*	else

@@ -24,7 +24,7 @@ dcachef_t dcachef;
 logic match1, match2, dirty1, dirty2, LRU_idx, 
 blockoff, next_dirty, next_v, next_LRU, cacheWEN, 
 match_idx, data_idx;
-logic [3:0] count, n_count;
+logic [4:0] count, n_count;
 logic [25:0] next_tag;
 word_t next_data, match_countup, match_countdown, next_match_countup, next_match_countdown;
 typedef enum logic [3:0] {IDLE, WB1, WB2, LD1, LD2, FLUSH1, FLUSH2, FLUSH3, WRITE_COUNT, HALT} 
@@ -50,6 +50,8 @@ begin
 			dcache_tab[i].set[0] <= dcache_entry'(0);
 			dcache_tab[i].set[1] <= dcache_entry'(0);
 			dcache_tab[i].LRU <= 0;
+			match_countdown = 0;
+			match_countup = 0;
 		end
 	end
 	else
@@ -257,12 +259,12 @@ begin
 			if (!dcache_tab[count[2:0]].set[count[3]].dirty)
 			begin
 				n_count = count + 1;
-				if(count != 4'd15)
-					next_state = FLUSH1;
-				else
+				if(count > 5'd15)
 					next_state = WRITE_COUNT;
+				else
+					next_state = FLUSH1;
 			end
-			else if (count != 4'd15)
+			else if (count <= 5'd15)
 			begin
 				next_state = FLUSH2;
 			end
@@ -297,7 +299,7 @@ begin
 			begin
 				next_state = FLUSH1;
 				n_count = count + 1;
-				if(count == 4'd15)
+				if(count > 5'd15)
 					next_state = WRITE_COUNT;
 			end
 		end
@@ -331,6 +333,8 @@ begin
 			cdcif.daddr = 0;
 			ddcif.dmemload = 0;
 			n_count = 0;
+			next_match_countdown = 0;
+			next_match_countup = 0;
 		end
 	endcase
 end
