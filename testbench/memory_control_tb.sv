@@ -51,13 +51,18 @@ program test(
 );
 initial
 begin
-	@(negedge CLK);
+	@(posedge CLK);
 	nRST = 0;
-	@(negedge CLK);
+	@(posedge CLK);
 	nRST = 1;
-	@(negedge CLK);
-	tbif.cctrans = 1;
-	tbif2.cctrans = 1;
+	@(posedge CLK);
+
+
+	//Testcase 1: Ramwrite and ccinv = 0
+	tbif2.ccwrite = 0;
+	tbif.ccwrite = 0;
+	tbif.cctrans = 0;
+	tbif2.cctrans = 0;
 	tbif.dREN = 0;
 	tbif.dWEN = 0;
 	tbif.daddr = 0;
@@ -70,10 +75,126 @@ begin
 	tbif2.dstore = 0;
 	tbif2.iREN = 0;
 	tbif2.iaddr = 0;
-	@(negedge CLK);
-	@(negedge CLK);
-	@(negedge CLK);
-	@(negedge CLK);
+	@(posedge CLK);
+	tbif.cctrans = 1;
+	tbif2.cctrans = 1;
+	tbif.dREN = 1;
+	tbif2.dWEN = 1;
+	tbif.daddr = 32'hBBBBBBBB;
+	tbif2.daddr = 32'hBBBBBBBC;
+	tbif2.dstore = 32'hB00B1E5;
+	@(posedge CLK);
+	@(posedge CLK);
+	tbif2.ccwrite = 1;
+	tbif.ccwrite = 0;
+	tbif2.daddr = 32'hBBBBBBBB;
+	@(posedge CLK);
+	@(posedge CLK);
+	@(posedge CLK);
+	tbif.daddr = 32'hBBBBBBBB + 4;
+	tbif2.daddr = 32'hBBBBBBBB + 4;
+	tbif2.dstore = 32'hA551A551;
+	@(posedge CLK);
+	@(posedge CLK);
+
+	//Testcase 2: ramread and ccinv = 1
+	tbif2.ccwrite = 0;
+	tbif.ccwrite = 0;
+	tbif.cctrans = 0;
+	tbif2.cctrans = 0;
+	tbif.dREN = 0;
+	tbif.dWEN = 0;
+	tbif.daddr = 0;
+	tbif.dstore = 0;
+	tbif.iREN = 0;
+	tbif.iaddr = 0;
+	tbif2.dREN = 0;
+	tbif2.dWEN = 0;
+	tbif2.daddr = 0;
+	tbif2.dstore = 0;
+	tbif2.iREN = 0;
+	tbif2.iaddr = 0;
+
+	@(posedge CLK);
+	@(posedge CLK);
+	@(posedge CLK);
+	tbif.cctrans = 0;
+	tbif2.cctrans = 1;
+	tbif2.dREN = 1;
+	tbif2.daddr = 32'hBBBBBBBC;
+	@(posedge CLK);
+	@(posedge CLK);
+	tbif2.ccwrite = 1;
+	tbif.ccwrite = 0;
+	tbif2.daddr = 32'hBBBBBBBB;
+	@(posedge CLK);
+	@(posedge CLK);
+	@(posedge CLK);
+	//tbif.daddr = 32'hBBBBBBBB + 4;
+	tbif2.daddr = 32'hBBBBBBBB + 4;
+	//tbif2.dstore = 32'hA551A551;
+	@(posedge CLK);
+	@(posedge CLK);
+	
+	//Testcase 3: WB 
+	tbif2.ccwrite = 0;
+	tbif.ccwrite = 0;
+	tbif.cctrans = 0;
+	tbif2.cctrans = 0;
+	tbif.dREN = 0;
+	tbif.dWEN = 0;
+	tbif.daddr = 0;
+	tbif.dstore = 0;
+	tbif.iREN = 0;
+	tbif.iaddr = 0;
+	tbif2.dREN = 0;
+	tbif2.dWEN = 0;
+	tbif2.daddr = 0;
+	tbif2.dstore = 0;
+	tbif2.iREN = 0;
+	tbif2.iaddr = 0;
+	@(posedge CLK);
+	@(posedge CLK);
+	@(posedge CLK);
+
+	@(posedge CLK);
+	tbif.cctrans = 1;
+	tbif2.cctrans = 1;
+	tbif.dWEN = 1;
+	tbif2.dREN = 1;
+	tbif.daddr = 32'hBBBBBBBB;
+	tbif2.daddr = 32'hBBBBBBBC;
+	tbif.dstore = 32'hB00B1E5;
+	@(posedge CLK);
+	@(posedge CLK);
+	tbif.daddr = 32'hDEADDEAD;
+	@(posedge CLK);
+	@(posedge CLK);
+	tbif.daddr = 32'hDEADDEAD + 4;
+	//tbif2.daddr = 32'hBBBBBBBB + 4;
+	tbif.dstore = 32'hA551A551;
+	@(posedge CLK);
+	@(posedge CLK);
+
+	tbif2.ccwrite = 0;
+	tbif.ccwrite = 0;
+	tbif.cctrans = 0;
+	tbif2.cctrans = 0;
+	tbif.dREN = 0;
+	tbif.dWEN = 0;
+	tbif.daddr = 0;
+	tbif.dstore = 0;
+	tbif.iREN = 0;
+	tbif.iaddr = 0;
+	tbif2.dREN = 0;
+	tbif2.dWEN = 0;
+	tbif2.daddr = 0;
+	tbif2.dstore = 0;
+	tbif2.iREN = 0;
+	tbif2.iaddr = 0;
+	@(posedge CLK);
+	@(posedge CLK);
+	@(posedge CLK);
 	$finish;
 	/*
 	//ccif.ramstate = FREE;

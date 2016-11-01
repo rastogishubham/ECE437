@@ -46,6 +46,8 @@ module memory_control (
   	ccif.ramREN = 0;
   	ccif.ramaddr = 0;
   	ccif.ramstore = 0;
+  	ccif.ccsnoopaddr = 0;
+  	ccif.dload = 0;
   	case(state)
   		IDLE:
   		begin
