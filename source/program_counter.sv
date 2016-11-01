@@ -4,11 +4,13 @@ module program_counter (
   input logic CLK, nRST,
   program_counter_if.pc pcif
 );
+
+parameter PC_INIT = 0;
   import cpu_types_pkg::*;
   always_ff @(posedge CLK, negedge nRST)
   begin
 	if(!nRST)
-		pcif.PCOut <= '{default: '0};
+		pcif.PCOut <= PC_INIT;
 	else if(pcif.PCEN)
 		pcif.PCOut <= pcif.PCNext;
 	else
