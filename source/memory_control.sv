@@ -21,9 +21,9 @@ module memory_control (
 
   // number of cpus for cc
   parameter CPUS = 2;
-  logic service;
+  logic service, next_service;
   logic service_icache, next_service_icache;
-  typedef enum logic [3:0] {IDLE, INSTR_SERVICE, WB1, WB2, SNOOP, RAMWRITE1, RAMWRITE2, RAMREAD1, RAMREAD2}
+  typedef enum logic [3:0] {IDLE, INSTR_SERVICE, ARB, WB1, WB2, SNOOP, RAMWRITE1, RAMWRITE2, RAMREAD1, RAMREAD2}
   state_type;
   state_type state, next_state;
 
@@ -32,28 +32,40 @@ module memory_control (
   	if(~nRST)
   	begin
   		state <= IDLE;
-  		service_icache <= 0;
+  		//service_icache <= 0;
   	end
  	else
  	begin
   		state <= next_state;
-  		if(ccif.cctrans[0])
+  		service <= next_service;
+  		/*if(ccif.cctrans[0] || ccif.dWEN[0])
   		 	service <= 0;
-  		else if(ccif.cctrans[1])
+  		else if(ccif.cctrans[1] || ccif.dWEN[1])
   		 	service <= 1;
   		else
   		begin
-  		 	if(ccif.dWEN[0])
+  		 	/*if(ccif.dWEN[0])
   		 		service <= 0;
   		 	else if(ccif.dWEN[1])
   		 		service <= 1;
   		 	else
   		 		service <= 0;
-  		end
-  		if(ccif.ramstate == ACCESS)
-			service_icache <= next_service_icache;
+  		end*/
   	end
   end
+
+always_ff @(posedge CLK, negedge nRST) 
+begin
+  	if(~nRST)
+  		service_icache <= 0;
+
+  	else
+  	begin
+  	if(~ccif.iwait[0] | ~ccif.iwait[1])
+			service_icache <= ~service_icache;
+	end
+end
+
 
   always_comb
   begin
@@ -69,11 +81,12 @@ module memory_control (
   	ccif.ccinv = 0;
 	ccif.iwait = 2'b11;
 	ccif.iload = 0;
-	next_service_icache = service_icache;
+	next_service = service;
+	//next_service_icache = service_icache;
   	case(state)
   		IDLE:
   		begin
-	  		if(ccif.iREN[0] && ccif.iREN[1])
+	  		/*if(ccif.iREN[0] && ccif.iREN[1])
 			begin
 				next_service_icache = ~service_icache;
 			end
@@ -88,32 +101,119 @@ module memory_control (
 			else
 			begin
 				next_service_icache = service_icache;
-			end
-  			if(ccif.cctrans[service])
+			end*/
+
+			if(ccif.cctrans[0] || ccif.dWEN[0])
+  		 		next_service = 0;
+  			else if(ccif.cctrans[1] || ccif.dWEN[1])
+  		 		next_service = 1;
+  			else
+  				next_service = service;
+
+  			if(ccif.cctrans)
   			begin
-  				next_state = SNOOP;
+  				next_state = ARB;
   			end
-  			else if(ccif.dWEN[service])
-  				next_state = WB1;
-  			else if(ccif.iREN[service_icache])
+  			else if(ccif.dWEN)
+  				next_state = ARB;
+  			else if(ccif.iREN[0] | ccif.iREN[1])
   				next_state = INSTR_SERVICE;
   			else
   			begin
   				next_state = IDLE;
   			end
   		end
-  		INSTR_SERVICE:
+  		ARB:
   		begin
-	  		ccif.ramREN = ccif.iREN[service_icache];
-			ccif.ramaddr = ccif.iaddr[service_icache];
-			ccif.iload[service_icache] = ccif.ramload;
-			if(ccif.ramstate == ACCESS)
-			begin
-				ccif.iwait[service_icache] = 0;
-  				next_state = IDLE;
+  			if(ccif.cctrans[service])
+  			begin
+  				next_state = SNOOP;
   			end
   			else
-  				next_state = INSTR_SERVICE;
+  				next_state = WB1;
+  		end
+  		INSTR_SERVICE:
+  		begin
+  			if(service_icache == 0 & ccif.iREN[0] & ccif.iREN[1])
+  			begin
+		  		ccif.ramREN = ccif.iREN[1];
+				ccif.ramaddr = ccif.iaddr[1];
+				ccif.iload[1] = ccif.ramload;
+				if(ccif.ramstate == ACCESS)
+				begin
+					ccif.iwait[1] = 0;
+	  				next_state = IDLE;
+	  			end
+	  			else
+	  				next_state = INSTR_SERVICE;
+  			end
+  			else if(service_icache == 0 & ccif.iREN[0] & ~ccif.iREN[1])
+  			begin
+		  		ccif.ramREN = ccif.iREN[0];
+				ccif.ramaddr = ccif.iaddr[0];
+				ccif.iload[0] = ccif.ramload;
+				if(ccif.ramstate == ACCESS)
+				begin
+					ccif.iwait[0] = 0;
+	  				next_state = IDLE;
+	  			end
+	  			else
+	  				next_state = INSTR_SERVICE;
+  			end
+  			else if(service_icache == 0 & ~ccif.iREN[0] & ccif.iREN[1])
+  			begin
+		  		ccif.ramREN = ccif.iREN[1];
+				ccif.ramaddr = ccif.iaddr[1];
+				ccif.iload[1] = ccif.ramload;
+				if(ccif.ramstate == ACCESS)
+				begin
+					ccif.iwait[1] = 0;
+	  				next_state = IDLE;
+	  			end
+	  			else
+	  				next_state = INSTR_SERVICE;
+  			end
+  			else if(service_icache == 1 & ccif.iREN[0] & ccif.iREN[1])
+  			begin
+		  		ccif.ramREN = ccif.iREN[0];
+				ccif.ramaddr = ccif.iaddr[0];
+				ccif.iload[0] = ccif.ramload;
+				if(ccif.ramstate == ACCESS)
+				begin
+					ccif.iwait[0] = 0;
+	  				next_state = IDLE;
+	  			end
+	  			else
+	  				next_state = INSTR_SERVICE;
+  			end
+  			else if(service_icache == 1 & ~ccif.iREN[0] & ccif.iREN[1])
+  			begin
+		  		ccif.ramREN = ccif.iREN[1];
+				ccif.ramaddr = ccif.iaddr[1];
+				ccif.iload[1] = ccif.ramload;
+				if(ccif.ramstate == ACCESS)
+				begin
+					ccif.iwait[1] = 0;
+	  				next_state = IDLE;
+	  			end
+	  			else
+	  				next_state = INSTR_SERVICE;
+  			end
+  			else if(service_icache == 1 & ccif.iREN[0] & ~ccif.iREN[1])
+  			begin
+		  		ccif.ramREN = ccif.iREN[0];
+				ccif.ramaddr = ccif.iaddr[0];
+				ccif.iload[0] = ccif.ramload;
+				if(ccif.ramstate == ACCESS)
+				begin
+					ccif.iwait[0] = 0;
+	  				next_state = IDLE;
+	  			end
+	  			else
+	  				next_state = INSTR_SERVICE;
+  			end
+  			else 
+  				next_state = IDLE;
   		end
   		WB1:
   		begin
@@ -165,12 +265,14 @@ module memory_control (
   			ccif.dload[service] = ccif.dstore[~service];
   			ccif.ramaddr = ccif.daddr[~service];
   			ccif.dwait[service] = 1;
+  			ccif.dwait[~service] = 1;
   			ccif.ccinv[~service] = ccif.ccwrite[service];
   			ccif.ccwait[~service] = 1;
   			if(ccif.ramstate == ACCESS)
   			begin
   				next_state = RAMWRITE2;
   				ccif.dwait[service] = 0;
+  				ccif.dwait[~service] = 0;
   			end
   			else
   				next_state = RAMWRITE1;
