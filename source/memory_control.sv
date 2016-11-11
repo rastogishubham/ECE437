@@ -259,6 +259,7 @@ end
   		end
   		RAMWRITE1:
   		begin
+  			ccif.ccsnoopaddr[~service] = ccif.daddr[service];
   			ccif.ramWEN = 1;
   			ccif.ramREN = 0;
   			ccif.ramstore = ccif.dstore[~service];
@@ -279,6 +280,7 @@ end
   		end
   		RAMWRITE2:
   		begin
+  			ccif.ccsnoopaddr[~service] = ccif.daddr[service];
   			ccif.ramWEN = 1;
   			ccif.ramREN = 0;
   			ccif.ramstore = ccif.dstore[~service];
