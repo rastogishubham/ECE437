@@ -8,7 +8,7 @@ interface control_unit_if;
   // import types
   import cpu_types_pkg::*;
 
-  logic PCSrc, RegWrite, ExtOP, dWEN, dREN, BNE, Halt, Jump;
+  logic PCSrc, RegWrite, ExtOP, dWEN, dREN, BNE, Halt, Jump, datomic;
   logic [1:0] ALUSrc, RegDest, JumpSel, MemtoReg;
   aluop_t ALUOP;
   opcode_t opcode_out;
@@ -21,13 +21,13 @@ interface control_unit_if;
   modport cu (
     input   Instr,
     output PCSrc, RegWrite, ExtOP, dWEN, dREN, BNE, Halt, Jump, ALUSrc, 
-    RegDest, JumpSel, MemtoReg, ALUOP, Rs, Rt, Rd, Imm, j25, shamt, opcode_out
+    RegDest, JumpSel, MemtoReg, ALUOP, Rs, Rt, Rd, Imm, j25, shamt, opcode_out, datomic
   );
 
   modport tb (
     output   Instr,
     input PCSrc, RegWrite, ExtOP, dWEN, dREN, BNE, Halt, Jump, ALUSrc, 
-    RegDest, JumpSel, MemtoReg, ALUOP, Rs, Rt, Rd, Imm, j25, shamt, opcode_out
+    RegDest, JumpSel, MemtoReg, ALUOP, Rs, Rt, Rd, Imm, j25, shamt, opcode_out, datomic
   );
 
 endinterface

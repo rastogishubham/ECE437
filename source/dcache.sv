@@ -28,7 +28,7 @@ sncacheWEN, sn_next_v, sn_next_dirty, sn_match_idx, flush_dirty, cacheflushWEN;
 logic [4:0] count, n_count;
 logic [25:0] next_tag;
 word_t next_data, match_countup, match_countdown, next_match_countup, next_match_countdown;
-typedef enum logic [3:0] {IDLE, WB1, WB2, LD1, LD2, FLUSH1, FLUSH2, FLUSH3, HALT, UPDATE_CACHE, WAIT, SNOOPWB1, SNOOPWB2} 
+typedef enum logic [3:0] {IDLE, WB1, WB2, LD1, LD2, FLUSH1, FLUSH2, FLUSH3, HALT, UPDATE_CACHE, WAIT, SNOOPWB1, SNOOPWB2, HALT_SNOOP} 
 state_type;
 state_type state, next_state;
 
@@ -360,8 +360,13 @@ begin
 		end*/
 		HALT: begin
 			cacheWEN = 0;
-			next_state = HALT;
 			ddcif.flushed = 1;
+			cdcif.cctrans = 0;
+			cdcif.ccwrite = 0;
+			if(cdcif.ccwait)
+				next_state = HALT_SNOOP;
+			else
+				next_state = HALT;
 		end
 
 		UPDATE_CACHE:
@@ -474,6 +479,12 @@ begin
 			end
 			else
 				next_state = SNOOPWB2;
+		end
+		HALT_SNOOP:
+		begin
+			cacheWEN = 0;
+			cdcif.cctrans = 1;
+			next_state = HALT;
 		end
 		default: begin
 			next_state = state;

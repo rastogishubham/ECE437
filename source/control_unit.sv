@@ -19,6 +19,7 @@ assign func_code = funct_t'(cuif.Instr[5:0]);
 assign cuif.opcode_out = opercode;
 always_comb
 begin
+	cuif.datomic = 0;
 	casez(opercode)
 	RTYPE:
 	begin
@@ -474,6 +475,40 @@ begin
 		cuif.Halt = 1;
 		cuif.Jump = 0;
 	end
+	LL:
+	begin
+		cuif.PCSrc = 0; //dont care
+		cuif.RegDest = 2'b00;
+		cuif.ExtOP = 1;
+		cuif.MemtoReg = 2'b1;
+		cuif.RegWrite = 1;
+		cuif.dWEN = 0;
+		cuif.dREN = 1;
+		cuif.ALUSrc = 2'b10; 
+		cuif.JumpSel = 2'b00;
+		cuif.ALUOP = ALU_ADD;
+		cuif.BNE = 0; //dont care
+		cuif.Halt = 0;
+		cuif.Jump = 0;
+		cuif.datomic = 1;
+	end
+	SC:
+	begin
+		cuif.PCSrc = 0; //dont care
+		cuif.RegDest = 2'b00;
+		cuif.ExtOP = 1;
+		cuif.MemtoReg = 2'b0; //dont care
+		cuif.RegWrite = 0;
+		cuif.dWEN = 1;
+		cuif.dREN = 0;
+		cuif.ALUSrc = 2'b10;
+		cuif.JumpSel = 2'b00;
+		cuif.ALUOP = ALU_ADD;
+		cuif.BNE = 0; //dont care
+		cuif.Halt = 0;
+		cuif.Jump = 0;
+		cuif.datomic = 1;
+	end
 	default:
 	begin
 		cuif.PCSrc = 0; //dont care
@@ -489,6 +524,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	endcase
 	
