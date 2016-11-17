@@ -497,7 +497,7 @@ begin
 		cuif.PCSrc = 0; //dont care
 		cuif.RegDest = 2'b00;
 		cuif.ExtOP = 1;
-		cuif.MemtoReg = 2'b0; //dont care
+		cuif.MemtoReg = 2'b1;
 		cuif.RegWrite = 0;
 		cuif.dWEN = 1;
 		cuif.dREN = 0;

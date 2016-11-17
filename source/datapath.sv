@@ -367,6 +367,7 @@ assign dpif.imemREN = 1;
 
 //Control Unit
 assign cuif.Instr = ifidif.instr;
+assign dpif.datomic = cuif.datomic;
 
 assign exmemif.flush = dpif.dhit;
 /*always_comb

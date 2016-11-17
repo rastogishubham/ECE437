@@ -19,6 +19,11 @@ typedef struct packed {
 	logic LRU;
 } dcache_frame;
 
+typedef struct packed {
+	logic v;
+	word_t link;
+} link_reg_t;
+
 dcache_frame [7:0] dcache_tab;
 dcachef_t dcachef, sndcachef;
 logic match1, match2, dirty1, dirty2, LRU_idx, 
@@ -31,6 +36,7 @@ word_t next_data, match_countup, match_countdown, next_match_countup, next_match
 typedef enum logic [3:0] {IDLE, WB1, WB2, LD1, LD2, FLUSH1, FLUSH2, FLUSH3, HALT, UPDATE_CACHE, WAIT, SNOOPWB1, SNOOPWB2, HALT_SNOOP} 
 state_type;
 state_type state, next_state;
+link_reg_t link_reg, next_link_reg;
 
 always_ff @(posedge CLK, negedge nRST) 
 begin
@@ -60,6 +66,8 @@ begin
 		count <= n_count;
 		//match_countup <=  next_match_countup;
 		//match_countdown <= next_match_countdown;
+		link_reg.v <= next_link_reg.v;
+		link_reg.link <= next_link_reg.link;
 		if (cacheWEN)
 		begin
 			dcache_tab[dcachef.idx].set[match_idx].dirty <= next_dirty;
@@ -231,6 +239,7 @@ begin
 
 
 			cdcif.cctrans = 1;
+			next_LRU = match_idx;
 			if(ddcif.dmemWEN)
 				cdcif.ccwrite = 1;
 
@@ -516,7 +525,6 @@ assign match2 = (dcache_tab[dcachef.idx].set[1].tag == dcachef.tag)
 				& dcache_tab[dcachef.idx].set[1].v;
 assign dirty2 = dcache_tab[dcachef.idx].set[1].dirty;
 assign blockoff = dcachef.blkoff;
-//assign ddcif.dhit = ((match1 | match2) & (ddcif.dmemREN | ddcif.dmemWEN));
 assign match_idx = (match1) ? 0 : ((match2) ? 1 : LRU_idx);
 assign data_idx = (match1 | match2) ? blockoff : ((state == LD1) ? 0 : 1);
 
@@ -529,7 +537,9 @@ assign snmatch1 = (dcache_tab[sndcachef.idx].set[0].tag == sndcachef.tag)
 				& dcache_tab[sndcachef.idx].set[0].v;
 assign snmatch2 = (dcache_tab[sndcachef.idx].set[1].tag == sndcachef.tag)
 				& dcache_tab[sndcachef.idx].set[1].v;
-assign sn_match_idx = (snmatch1) ? 0 : ((snmatch2) ? 1 : 0);			
+assign sn_match_idx = (snmatch1) ? 0 : ((snmatch2) ? 1 : 0);		
 
+//LL and SC
+assign next_link_reg.v = ~(ddcif.dmemWEN || cdcif.ccinv);
 
 endmodule

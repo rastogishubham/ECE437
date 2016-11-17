@@ -30,7 +30,7 @@ begin
 	begin
 		hzif.Rt_Sel = 2'b00;
 	end
-	if((hzif.ex_op == LW || hzif.ex_op == SW) && (hzif.Rs_ID == hzif.Wsel_mem || hzif.Rt_ID == hzif.Wsel_mem && hzif.RegWrite_mem && hzif.Wsel_mem != 0)) 
+	if((hzif.ex_op == LW || hzif.ex_op == SW || hzif.ex_op == LL || hzif.ex_op == SC) && (hzif.Rs_ID == hzif.Wsel_mem || hzif.Rt_ID == hzif.Wsel_mem && hzif.RegWrite_mem && hzif.Wsel_mem != 0)) 
 		hzif.flush_ls = 1;
 	else
 		hzif.flush_ls = 0;
