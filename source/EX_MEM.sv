@@ -20,6 +20,7 @@ module EX_MEM (
         exmemif.Porto_out <= '0;
         exmemif.pcp4_out <= '0;
         exmemif.dmemstr_out <= '0;
+        exmemif.datomic_out <= '0;
   		end
       else
       begin
@@ -36,6 +37,7 @@ module EX_MEM (
           exmemif.Porto_out <= exmemif.Porto_in;
           exmemif.pcp4_out <= exmemif.pcp4_in;
           exmemif.dmemstr_out <= exmemif.dmemstr_in;
+          exmemif.datomic_out <= exmemif.datomic_in;
         /*  if(exmemif.dhit)
           begin
             exmemif.dWEN_out <= 0;
@@ -60,6 +62,7 @@ module EX_MEM (
             exmemif.Porto_out <= '0;
             exmemif.pcp4_out <= '0;
             exmemif.dmemstr_out <= '0;
+            exmemif.datomic_out <= '0;
           end
           if(exmemif.Halt_out)
           begin
@@ -74,6 +77,7 @@ module EX_MEM (
             exmemif.Porto_out <= '0;
             exmemif.pcp4_out <= '0;
             exmemif.dmemstr_out <= '0;
+            exmemif.datomic_out <= '0;
           end
   		  end
       end

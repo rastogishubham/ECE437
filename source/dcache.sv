@@ -57,15 +57,13 @@ begin
 			dcache_tab[i].set[0] <= dcache_entry'(0);
 			dcache_tab[i].set[1] <= dcache_entry'(0);
 			dcache_tab[i].LRU <= 0;
-			//match_countdown <= 0;
-			//match_countup <= 0;
 		end
+		link_reg.v <= 0;
+		link_reg.link <= '0;
 	end
 	else
 	begin
 		count <= n_count;
-		//match_countup <=  next_match_countup;
-		//match_countdown <= next_match_countdown;
 		link_reg.v <= next_link_reg.v;
 		link_reg.link <= next_link_reg.link;
 		if (cacheWEN)
@@ -102,8 +100,6 @@ begin
 	cdcif.dWEN = 0;
 	ddcif.dmemload = 32'b0;
 	cdcif.dREN = 0;
-	//next_match_countdown = match_countdown;
-	//next_match_countup = match_countup;
 	ddcif.dhit = 0;
 	cdcif.cctrans = 0;
 	cdcif.ccwrite = 0;
@@ -111,20 +107,28 @@ begin
 	sn_next_v = 0;
 	sn_next_dirty = 0;
 	cacheflushWEN = 0;
+	next_link_reg.link = link_reg.link;
+	next_link_reg.v = link_reg.v;
 	case(state)
 		IDLE: begin
 			n_count = 0;
 			cacheWEN = 0;
 			cdcif.dREN = 0;
-
-			/*if(ddcif.dhit)
+			if(ddcif.datomic & ddcif.dmemREN)
 			begin
-				next_match_countup = match_countup + 1;
-			end*/
-
-			if(!match1 && !match2 & (ddcif.dmemWEN | ddcif.dmemREN))
+				next_link_reg.link = ddcif.dmemaddr;
+				next_link_reg.v = 1;
+			end
+			if(ddcif.datomic & ddcif.dmemWEN & ddcif.dmemaddr == link_reg.link & link_reg.v)
+				ddcif.dmemload = 1;
+			if(ddcif.datomic & ddcif.dmemWEN & (ddcif.dmemaddr != link_reg.link | !link_reg.v))
 			begin
-				//match_countdown += 1;
+				ddcif.dhit = 1;
+				ddcif.dmemload = 0;
+				next_state = IDLE;
+			end
+			else if(!match1 && !match2 & (ddcif.dmemWEN | ddcif.dmemREN))
+			begin
 				if(LRU_idx == 0)
 				begin
 					if(dirty1)
@@ -148,7 +152,6 @@ begin
 			end
 			else if((match1 | match2) & ddcif.dmemREN)
 			begin
-			//	match_countup += 1;
 				ddcif.dhit = 1;
 				if(match1)
 				begin
@@ -166,6 +169,10 @@ begin
 			else if(((match1 & dirty1) | (match2 & dirty2)) & ddcif.dmemWEN)
 			begin
 				ddcif.dhit = 1;
+				if(ddcif.dmemWEN)
+				begin
+					next_link_reg.v = 0;
+				end
 				if(match1)
 				begin
 					cacheWEN = 1;
@@ -236,8 +243,6 @@ begin
 		end
 
 		LD1: begin
-
-
 			cdcif.cctrans = 1;
 			next_LRU = match_idx;
 			if(ddcif.dmemWEN)
@@ -292,7 +297,6 @@ begin
 				next_data = cdcif.dload;
 				next_state = IDLE;
 				cacheWEN = 1;
-				//next_match_countdown = match_countdown + 1;
 			end
 		end
 
@@ -357,16 +361,6 @@ begin
 					next_state = HALT;
 			end
 		end
-		/*WRITE_COUNT: begin
-			cacheWEN = 0;
-			cdcif.dWEN = 1;
-			cdcif.daddr = 32'h00003100;
-			cdcif.dstore = (match_countup - match_countdown);
-			if(cdcif.dwait)
-				next_state = WRITE_COUNT;
-			else
-				next_state = HALT;
-		end*/
 		HALT: begin
 			cacheWEN = 0;
 			ddcif.flushed = 1;
@@ -380,6 +374,14 @@ begin
 
 		UPDATE_CACHE:
 		begin
+			if(ddcif.dmemWEN)
+			begin
+				next_link_reg.v = 0;
+			end
+			if(ddcif.datomic & ddcif.dmemWEN & ddcif.dmemaddr == link_reg.link & link_reg.v)
+			begin
+				ddcif.dmemload = 1;
+			end
 			ddcif.dhit = 1;
 			next_state = IDLE;
 			cdcif.cctrans = 0;
@@ -405,6 +407,10 @@ begin
 		WAIT:
 		begin
 			cdcif.cctrans = 0;
+			if(cdcif.ccinv)
+			begin
+				next_link_reg.v = 0;
+			end
 			if(cdcif.ccinv & snmatch1 & ~sndirty1)
 			begin
 				sncacheWEN = 1;
@@ -540,6 +546,6 @@ assign snmatch2 = (dcache_tab[sndcachef.idx].set[1].tag == sndcachef.tag)
 assign sn_match_idx = (snmatch1) ? 0 : ((snmatch2) ? 1 : 0);		
 
 //LL and SC
-assign next_link_reg.v = ~(ddcif.dmemWEN || cdcif.ccinv);
+//assign next_link_reg.v = ~(ddcif.dmemWEN || cdcif.ccinv);
 
 endmodule

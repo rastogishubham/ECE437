@@ -120,6 +120,7 @@ assign idexif.rdat1_in = rfif.rdat1;
 assign idexif.rdat2_in = rfif.rdat2;
 assign idexif.pcp4_in = ifidif.pcp4_out;
 assign idexif.extImm_in = extImm;
+assign idexif.datomic_in = cuif.datomic;
 
 
 //EX_MEM
@@ -135,6 +136,7 @@ assign exmemif.pcp4_in = idexif.pcp4_out;
 assign exmemif.ihit = dpif.ihit;
 assign exmemif.dhit = dpif.dhit;
 assign exmemif.dmemstr_in = PortB_int;
+assign exmemif.datomic_in = idexif.datomic_out;
 
 //M/WB
 assign memwbif.Halt_in = exmemif.Halt_out;
@@ -367,7 +369,7 @@ assign dpif.imemREN = 1;
 
 //Control Unit
 assign cuif.Instr = ifidif.instr;
-assign dpif.datomic = cuif.datomic;
+assign dpif.datomic = exmemif.datomic_out;
 
 assign exmemif.flush = dpif.dhit;
 /*always_comb

@@ -31,6 +31,7 @@ module ID_EX (
         idexif.rdat2_out <= '0;
         idexif.pcp4_out <= '0;
         idexif.extImm_out <= '0;
+        idexif.datomic_out <= '0;
   		end
       else
       begin
@@ -58,6 +59,7 @@ module ID_EX (
           idexif.rdat2_out <= '0;
           idexif.pcp4_out <= '0;
           idexif.extImm_out <= '0;
+          idexif.datomic_out <= '0;
         end
     		else if(idexif.ihit)
     		begin
@@ -83,6 +85,7 @@ module ID_EX (
           idexif.rdat2_out <= idexif.rdat2_in;
           idexif.pcp4_out <= idexif.pcp4_in; 
           idexif.extImm_out <= idexif.extImm_in;
+          idexif.datomic_out <= idexif.datomic_in;
     		end
     		else
     		begin
@@ -108,6 +111,7 @@ module ID_EX (
           idexif.rdat2_out <= idexif.rdat2_out;
           idexif.pcp4_out <= idexif.pcp4_out; 
           idexif.extImm_out <= idexif.extImm_out;
+          idexif.datomic_out <= idexif.datomic_out;
     		end
       end
     end

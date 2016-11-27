@@ -39,6 +39,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		SRL:
 		begin
@@ -55,6 +56,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		JR:
 		begin
@@ -71,6 +73,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 1;
+			cuif.datomic = 0;
 		end
 		ADD:
 		begin
@@ -87,6 +90,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		ADDU:
 		begin
@@ -103,6 +107,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		SUB:
 		begin
@@ -119,6 +124,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		SUBU:
 		begin
@@ -135,6 +141,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		AND:
 		begin
@@ -151,6 +158,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		OR:
 		begin
@@ -167,6 +175,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		XOR:
 		begin
@@ -183,6 +192,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		NOR:
 		begin
@@ -199,6 +209,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		SLT:
 		begin
@@ -215,6 +226,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		SLTU:
 		begin
@@ -231,6 +243,7 @@ begin
 			cuif.BNE = 0; //dont care
 			cuif.Halt = 0;
 			cuif.Jump = 0;
+			cuif.datomic = 0;
 		end
 		endcase
 	end
@@ -249,6 +262,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 1;
+		cuif.datomic = 0;
 	end
 	JAL:
 	begin		
@@ -265,6 +279,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 1;
+		cuif.datomic = 0;
 	end
 	BEQ:
 	begin
@@ -281,6 +296,7 @@ begin
 		cuif.BNE = 0;
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	BNE:
 	begin
@@ -297,6 +313,7 @@ begin
 		cuif.BNE = 1;
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	ADDI:
 	begin
@@ -313,6 +330,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	ADDIU:
 	begin
@@ -329,6 +347,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	SLTI:
 	begin
@@ -345,6 +364,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	SLTIU:
 	begin
@@ -361,6 +381,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	ANDI:
 	begin
@@ -377,6 +398,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	ORI:
 	begin
@@ -393,6 +415,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	XORI:
 	begin
@@ -410,6 +433,7 @@ begin
 		cuif.Halt = 0;
 		cuif.Jump = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	LUI:
 	begin
@@ -426,6 +450,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	LW:
 	begin
@@ -442,6 +467,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	SW:
 	begin
@@ -458,6 +484,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 0;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	HALT:
 	begin
@@ -474,6 +501,7 @@ begin
 		cuif.BNE = 0; //dont care
 		cuif.Halt = 1;
 		cuif.Jump = 0;
+		cuif.datomic = 0;
 	end
 	LL:
 	begin
@@ -498,7 +526,7 @@ begin
 		cuif.RegDest = 2'b00;
 		cuif.ExtOP = 1;
 		cuif.MemtoReg = 2'b1;
-		cuif.RegWrite = 0;
+		cuif.RegWrite = 1;
 		cuif.dWEN = 1;
 		cuif.dREN = 0;
 		cuif.ALUSrc = 2'b10;
