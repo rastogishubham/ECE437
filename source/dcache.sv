@@ -276,6 +276,8 @@ begin
 			cdcif.dWEN = 0;
 			cdcif.dREN = 1;
 			cdcif.daddr = {dcachef.tag, dcachef.idx, 3'b100};
+			if(ddcif.dmemWEN)
+				cdcif.ccwrite = 1;
 			if(cdcif.dwait)
 			begin
 				next_state = LD2;
