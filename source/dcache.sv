@@ -169,7 +169,7 @@ begin
 			else if(((match1 & dirty1) | (match2 & dirty2)) & ddcif.dmemWEN)
 			begin
 				ddcif.dhit = 1;
-				if(ddcif.dmemWEN)
+				if(ddcif.dmemWEN & link_reg.link == ddcif.dmemaddr)
 				begin
 					next_link_reg.v = 0;
 				end
@@ -376,7 +376,7 @@ begin
 
 		UPDATE_CACHE:
 		begin
-			if(ddcif.dmemWEN)
+			if(ddcif.dmemWEN & link_reg.link == cdcif.ccsnoopaddr)
 			begin
 				next_link_reg.v = 0;
 			end
