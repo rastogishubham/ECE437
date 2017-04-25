@@ -376,7 +376,7 @@ begin
 
 		UPDATE_CACHE:
 		begin
-			if(ddcif.dmemWEN & link_reg.link == cdcif.ccsnoopaddr)
+			if(ddcif.dmemWEN & link_reg.link == dcdif.dmemaddr)
 			begin
 				next_link_reg.v = 0;
 			end
@@ -409,7 +409,7 @@ begin
 		WAIT:
 		begin
 			cdcif.cctrans = 0;
-			if(cdcif.ccinv)
+			if(cdcif.ccinv & link_reg.link[31:3] == cdcif.ccsnoopaddr[31:3])
 			begin
 				next_link_reg.v = 0;
 			end
