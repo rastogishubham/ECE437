@@ -376,7 +376,7 @@ begin
 
 		UPDATE_CACHE:
 		begin
-			if(ddcif.dmemWEN & link_reg.link == dcdif.dmemaddr)
+			if(ddcif.dmemWEN & link_reg.link == ddcif.dmemaddr)
 			begin
 				next_link_reg.v = 0;
 			end
