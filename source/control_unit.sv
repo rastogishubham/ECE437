@@ -24,7 +24,7 @@ begin
 		casez(func_code)
 		SLL:
 		begin
-			cuif.PCSrc = 0; //dont care
+			cuif.PCSrc = 0; 
 			cuif.RegDest = 2'b01;
 			cuif.ExtOP = 0; //dont care
 			cuif.MemtoReg = 0; 
