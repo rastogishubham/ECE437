@@ -47,7 +47,7 @@ begin
 			cuif.ExtOP = 0; //dont care
 			cuif.MemtoReg = 0; 
 			cuif.RegWrite = 1;
-			cuif.JAL = 0; //dont care
+			cuif.JAL = 0; 
 			cuif.dWEN = 0;
 			cuif.dREN = 0; 
 			cuif.imemREN = 1; 
