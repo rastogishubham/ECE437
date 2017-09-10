@@ -66,14 +66,15 @@ module memory_control_tb;
   );
 	
 `endif
-
-assign ramif.ramaddr = ccif.ramaddr;
-assign ramif.ramstore = ccif.ramstore;
-assign ramif.ramREN = ccif.ramREN;
-assign ramif.ramWEN = ccif.ramWEN;
-assign ccif.ramstate = ramif.ramstate;
-assign ccif.ramload = ramif.ramload;
-
+/*always_comb
+begin
+	ramif.ramaddr = ccif.ramaddr;
+	ramif.ramstore = ccif.ramstore;
+	ramif.ramREN = ccif.ramREN;
+	ramif.ramWEN = ccif.ramWEN;
+	ccif.ramstate = ramif.ramstate;
+	ccif.ramload = ramif.ramload;
+end*/
 endmodule
 program test(
 	input logic CLK,
@@ -85,7 +86,7 @@ program test(
 );
 initial
 begin
-	tbif.dREN = 0;
+	/*tbif.dREN = 0;
 	tbif.dWEN = 0;
 	tbif.daddr = 0;
 	tbif.dstore = 0;
@@ -118,7 +119,7 @@ begin
 	tbif.dstore = 32'hFFFFFFFD;
 	tbif2.daddr = 32'h00000000;
 	tbif2.dstore = 32'h00000000;*/
-@(negedge CLK);
+/*@(negedge CLK);
 	@(negedge CLK);
 	tbif.dWEN = 0;
 	tbif.dREN = 1;
@@ -152,9 +153,11 @@ begin
 	if(ccif.ramload == 32'hFFFFFFFF)
 		$display("ramload right!");
 	else
-		$display("ramload wrong");
+		$display("ramload wrong");*/
 
-	dump_memory();
+	nRST = 0;
+	@(negedge CLK);
+	ramif.dump_memory();
 	$finish;
 end
 
@@ -163,9 +166,9 @@ task automatic dump_memory();
     string filename = "memcpu.hex";
     int memfd;
     //ccif.tbCTRL = 1;
-    cif0.daddr = 0;
-    cif0.dWEN = 0;
-    cif0.dREN = 0;
+    ramif.ramaddr = 0;
+    ramif.ramWEN = 0;
+    ramif.ramREN = 0;
 
     memfd = $fopen(filename,"w");
     if (memfd)
@@ -179,22 +182,22 @@ task automatic dump_memory();
       bit [7:0][7:0] values;
       string ihex;
 
-      cif0.daddr = i << 2;
-      cif0.dREN = 1;
+      ramif.ramaddr = i << 2;
+      ramif.ramREN = 1;
       repeat (4) @(posedge CLK);
-      if (cif0.dload === 0)
+      if (ramif.ramload === 0)
         continue;
-      values = {8'h04,16'(i),8'h00,cif0.dload};
+      values = {8'h04,16'(i),8'h00,ramif.ramload};
       foreach (values[j])
         chksum += values[j];
       chksum = 16'h100 - chksum;
-      ihex = $sformatf(":04%h00%h%h",16'(i),cif0.dload,8'(chksum));
+      ihex = $sformatf(":04%h00%h%h",16'(i),ramif.ramload,8'(chksum));
       $fdisplay(memfd,"%s",ihex.toupper());
     end //for
     if (memfd)
     begin
       //ccif.tbCTRL = 0;
-      cif0.dREN = 0;
+      ramif.ramREN = 0;
       $fdisplay(memfd,":00000001FF");
       $fclose(memfd);
       $display("Finished memory dump.");
