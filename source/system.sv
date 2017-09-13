@@ -57,7 +57,7 @@ module system (input logic CLK, nRST, system_if.sys syif);
   // interface connections
   assign syif.halt = halt;
   assign syif.load = prif.ramload;
-
+  assign syif.dumpCTRL = prif.dumpCTRL;
   always_comb
   begin
     prif.dumpCTRL = 0;
