@@ -76,11 +76,23 @@ program test(input logic CLK, output logic nRST, system_if.tb syif);
     end
     $display("Halted at %g time and ran for %d cycles.",$time, cycles);
     nRST = 0;
-    dump_memory();
+    syif.dump = 1;
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    @(posedge CLK);
+    syif.dump = 0;
+    //dump_memory();
     $finish;
   end
 
-  task automatic dump_memory();
+  /*task automatic dump_memory();
     string filename = "memcpu.hex";
     int memfd;
 
@@ -121,5 +133,5 @@ program test(input logic CLK, output logic nRST, system_if.tb syif);
       $fclose(memfd);
       $display("Finished memory dump.");
     end
-  endtask
+  endtask*/
 endprogram
