@@ -14,18 +14,18 @@ interface system_if;
   // import types
   import cpu_types_pkg::*;
 
-  logic               tbCTRL, halt, WEN, REN;
+  logic               tbCTRL, halt, WEN, REN, dump;
   word_t              addr, store, load;
 
   // system ports
   modport sys (
-    input   tbCTRL, WEN, REN, store, addr,
+    input   tbCTRL, WEN, REN, store, addr, dump,
     output  load, halt
   );
   // testbench program
   modport tb (
     input   load, halt,
-    output  tbCTRL, WEN, REN, store, addr
+    output  tbCTRL, WEN, REN, store, addr, dump
   );
 endinterface
 
