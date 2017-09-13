@@ -78,15 +78,10 @@ program test(input logic CLK, output logic nRST, system_if.tb syif);
     nRST = 0;
     syif.dump = 1;
     @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
-    @(posedge CLK);
+    while(syif.dumpCTRL)
+    begin
+      @(posedge CLK);
+    end
     syif.dump = 0;
     //dump_memory();
     $finish;
