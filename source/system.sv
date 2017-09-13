@@ -58,10 +58,21 @@ module system (input logic CLK, nRST, system_if.sys syif);
   assign syif.halt = halt;
   assign syif.load = prif.ramload;
 
+  always_comb
+  begin
+    prif.dumpCTRL = 0;
+  end
+
+  always @(posedge syif.dump)
+  begin
+    prif.dump_memory();
+  end
+
   // who has ram control
+  /*
   assign prif.ramWEN = (syif.tbCTRL) ? syif.WEN : prif.memWEN;
   assign prif.ramREN = (syif.tbCTRL) ? syif.REN : prif.memREN;
   assign prif.ramaddr = (syif.tbCTRL) ? syif.addr : prif.memaddr;
-  assign prif.ramstore = (syif.tbCTRL) ? syif.store : prif.memstore;
+  assign prif.ramstore = (syif.tbCTRL) ? syif.store : prif.memstore;*/
 
 endmodule
