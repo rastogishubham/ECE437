@@ -66,15 +66,15 @@ module memory_control_tb;
   );
 	
 `endif
-/*always_comb
+always_comb
 begin
-	ramif.ramaddr = ccif.ramaddr;
-	ramif.ramstore = ccif.ramstore;
-	ramif.ramREN = ccif.ramREN;
-	ramif.ramWEN = ccif.ramWEN;
+	ramif.memaddr = ccif.ramaddr;
+	ramif.memstore = ccif.ramstore;
+	ramif.memREN = ccif.ramREN;
+	ramif.memWEN = ccif.ramWEN;
 	ccif.ramstate = ramif.ramstate;
 	ccif.ramload = ramif.ramload;
-end*/
+end
 endmodule
 program test(
 	input logic CLK,
@@ -86,7 +86,7 @@ program test(
 );
 initial
 begin
-	/*tbif.dREN = 0;
+	tbif.dREN = 0;
 	tbif.dWEN = 0;
 	tbif.daddr = 0;
 	tbif.dstore = 0;
@@ -112,14 +112,14 @@ begin
 	tbif2.dstore = 32'h00000000;
 	//ramif.ramaddr = 
 	//ccif.ramstate = ACCESS;
-/*	@(negedge CLK);
+	@(negedge CLK);
 	@(negedge CLK);
 	@(negedge CLK);
 	tbif.daddr = 32'hBBBBBBBC;
 	tbif.dstore = 32'hFFFFFFFD;
 	tbif2.daddr = 32'h00000000;
-	tbif2.dstore = 32'h00000000;*/
-/*@(negedge CLK);
+	tbif2.dstore = 32'h00000000;
+@(negedge CLK);
 	@(negedge CLK);
 	tbif.dWEN = 0;
 	tbif.dREN = 1;
@@ -153,7 +153,7 @@ begin
 	if(ccif.ramload == 32'hFFFFFFFF)
 		$display("ramload right!");
 	else
-		$display("ramload wrong");*/
+		$display("ramload wrong");
 
 	nRST = 0;
 	@(negedge CLK);
@@ -161,7 +161,7 @@ begin
 	$finish;
 end
 
-task automatic dump_memory();
+/*task automatic dump_memory();
   
     string filename = "memcpu.hex";
     int memfd;
@@ -202,7 +202,7 @@ task automatic dump_memory();
       $fclose(memfd);
       $display("Finished memory dump.");
     end
-  endtask
+  endtask*/
 
 endprogram
 
