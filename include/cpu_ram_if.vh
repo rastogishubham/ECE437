@@ -14,7 +14,7 @@ interface cpu_ram_if;
   // import types
   import cpu_types_pkg::*;
 
-      parameter PERIOD = 10; 
+      parameter PERIOD = 20; 
     logic CLK = 0;
 
     always #(PERIOD/2) CLK++;
@@ -28,6 +28,17 @@ interface cpu_ram_if;
   logic               memREN, memWEN;
   word_t              memaddr, memstore;
 
+  //Dump task signals
+  logic               dumpramREN, dumpramWEN;
+  word_t              dumpramaddr, dumpramstore;
+
+  logic dumpCTRL;
+
+
+  assign ramREN = (dumpCTRL) ? dumpramREN : memREN;
+  assign ramWEN = (dumpCTRL) ? dumpramWEN : memWEN;
+  assign ramaddr = (dumpCTRL) ? dumpramaddr : memaddr;
+  assign ramstore = (dumpCTRL) ? dumpramstore : memstore;
 
   // cpu ports
   modport cpu (
@@ -51,9 +62,10 @@ interface cpu_ram_if;
 
     string filename = "memcpu.hex";
     int memfd;
-    ramaddr = 0;
-    ramWEN = 0;
-    ramREN = 0;
+    dumpramaddr = 0;
+    dumpramWEN = 0;
+    dumpramREN = 0;
+    dumpCTRL = 1;
 
     memfd = $fopen(filename,"w");
     if (memfd)
@@ -67,8 +79,8 @@ interface cpu_ram_if;
       bit [7:0][7:0] values;
       string ihex;
 
-      ramaddr = i << 2;
-      ramREN = 1;
+      dumpramaddr = i << 2;
+      dumpramREN = 1;
       repeat (4) @(posedge CLK);
       if (ramload === 0)
         continue;
@@ -81,7 +93,8 @@ interface cpu_ram_if;
     end //for
     if (memfd)
     begin
-      ramREN = 0;
+      dumpCTRL = 0;
+      dumpramREN = 0;
       $fdisplay(memfd,":00000001FF");
       $fclose(memfd);
       $display("Finished memory dump.");
