@@ -160,50 +160,6 @@ begin
 	ramif.dump_memory();
 	$finish;
 end
-
-/*task automatic dump_memory();
-  
-    string filename = "memcpu.hex";
-    int memfd;
-    //ccif.tbCTRL = 1;
-    ramif.ramaddr = 0;
-    ramif.ramWEN = 0;
-    ramif.ramREN = 0;
-
-    memfd = $fopen(filename,"w");
-    if (memfd)
-      $display("Starting memory dump.");
-    else
-      begin $display("Failed to open %s.",filename); $finish; end
-
-    for (int unsigned i = 0; memfd && i < 16384; i++)
-    begin
-      int chksum = 0;
-      bit [7:0][7:0] values;
-      string ihex;
-
-      ramif.ramaddr = i << 2;
-      ramif.ramREN = 1;
-      repeat (4) @(posedge CLK);
-      if (ramif.ramload === 0)
-        continue;
-      values = {8'h04,16'(i),8'h00,ramif.ramload};
-      foreach (values[j])
-        chksum += values[j];
-      chksum = 16'h100 - chksum;
-      ihex = $sformatf(":04%h00%h%h",16'(i),ramif.ramload,8'(chksum));
-      $fdisplay(memfd,"%s",ihex.toupper());
-    end //for
-    if (memfd)
-    begin
-      //ccif.tbCTRL = 0;
-      ramif.ramREN = 0;
-      $fdisplay(memfd,":00000001FF");
-      $fclose(memfd);
-      $display("Finished memory dump.");
-    end
-  endtask*/
-
 endprogram
 
 
