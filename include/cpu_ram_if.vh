@@ -11,10 +11,9 @@
 `include "cpu_types_pkg.vh"
 `timescale 1 ns / 1 ns
 interface cpu_ram_if;
-  // import types
   import cpu_types_pkg::*;
 
-      parameter PERIOD = 20; 
+    parameter PERIOD = 20; 
     logic CLK = 0;
 
     always #(PERIOD/2) CLK++;
@@ -65,6 +64,7 @@ interface cpu_ram_if;
     dumpramaddr = 0;
     dumpramWEN = 0;
     dumpramREN = 0;
+    dumpramstore = 0;
     dumpCTRL = 1;
 
     memfd = $fopen(filename,"w");
