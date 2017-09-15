@@ -78,11 +78,11 @@ end
   assign ruif.dREN = cuif.dREN;
   assign ruif.dhit = dpif.dhit;
   assign ruif.ihit = dpif.ihit;
-  assign pcif.PCEN = ruif.PCEN & ~cuif.Halt;
+  assign ruif.imemload = dpif.imemload;
   
   //Control Unit
 
-  assign cuif.Instr = dpif.imemload;
+  assign cuif.Instr = ruif.instr;
   
  //Register File
   
@@ -176,7 +176,7 @@ end
   end
 
   //Program Counter
-  
+  assign pcif.PCEN = ruif.PCEN & ~cuif.Halt;
   always_comb
   begin
 	Branch = Imm_ext << 2;
